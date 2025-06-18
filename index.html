@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gloup Soup Incubator</title>
+
+    <meta name="description" content="Film incubator for all the hackneyed and all the wicked." />
+    <link rel="canonical" href="https://theglitch.co" />
+    <meta property="og:title" content="Gloup Soup Incubator" />
+    <meta property="og:description" content="Come and make films with us. Film incubator for all the hackneyed and all the wicked." />
+  <!--  <meta property="og:image" content="https://theglitch.co/og/gloup-soup-v4.png" />
+    <meta property="og:url" content="https://theglitch.co" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" /> -->
+
+    <!-- viewport & dark background from the start -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root { background:#000; color:#fff; }
+      html,body{ margin:0; height:100%; width:100%; }
+      noscript pre{
+        max-width:98vw;
+        margin:0;
+        padding:1rem;
+        font:14px/1.25 "Courier New",monospace;
+        white-space:pre-wrap;
+      }
+    </style>
+
+    <!-- Favicon & theme colour -->
+    <link rel="icon" href="%PUBLIC_URL%/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#000000" />
+    <!-- Fonts for fallback text (same as runtime JS loads) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  </head>
+
+  <body>
+    <!-- React mounts here when JS is enabled -->
+    <div id="root"></div>
+
+    <!-- Fallback / crawler content -->
+    <noscript>
+<pre>
+  ──────────────────────────────────────────────────────────────────────────────
+
+                                        ░░░░░░░
+                                      ░░░░░░░░░░░░░
+                        ░░░░░░░      ░░░░░░░░░░░░░░░░
+                        ░░░░░░░░      ░░░░░░░░░░░░░░░░
+                  ░░░░   ░░░░░░░          ░░░░░░░░░░░░░     ░░░░░
+               ░░░░░░░░   ░░░░░░░             ░░░░░░░░░   ░░░░░░░
+             ░░░░░░░░░░░   ░░░░░░    ░░░░░░░░   ░░░░░░░   ░░░░░
+           ░░░░░░░░░░░░    ░░░░░░  ░░░░░░░░░░░░  ░░░░░░   ░░░░  ░░░
+         ░░░░░░░░░░░░       ░░░░░  ░░░░░░░░░░░░░  ░░░░░   ░░░  ░░░░░░░
+        ░░░░░░░             ░░░░░ ░░░░░░░░░░░░░░  ░░░░░   ░░░  ░░    ░░
+      ░░░░░░░   ░░░░░░░░░   ░░░░  ░░░░░     ░░░░  ░░░░░   ░░░  ░░     ░░░
+     ░░░░░░   ░░░░░░░░░░░░  ░░░░  ░░░░░     ░░░░  ░░░░░   ░░░  ░░░     ░░
+    ░░░░░░░  ░░░░░░░░░░░░  ░░░░░  ░░░░░     ░░░░ ░░░░░    ░░░  ░░░░   ░░░░
+   ░░░░░░░        ░░░░░░░  ░░░░░   ░░░░░░ ░░░░░  ░░░░    ░░░░  ░░░░░░░░░░░
+   ░░░░░░░░      ░░░░░░░  ░░░░░    ░░░░░░░░░░░  ░░░░░    ░░░  ░░░░  ░░░░░░
+   ░░░░░░░░░░░░░░░░░░░░   ░░░░░     ░░░░░░░░░  ░░░░░    ░░░░  ░░░░
+   ░░░░░░░░░░░░░░░░░░░  ░░░░░░░        ░░░     ░░░░░   ░░░░  ░░░░
+    ░░░░░░░░░░░░░░░░   ░░░░░░░░░░░░░░░         ░░░░░░░░░░░   ░░░░
+      ░░░░░░░░░░      ░░░░░░░░░░░░░░░░░░░░░░   ░░░░░░░░░    ░░░░
+                       ░░          ░░░░░░░░░   ░░░░░░       ░░░░   ░░░░░░░░
+    ░░░░░░░░░░░░░░░        ░░░░░░░                    ░░░   ░░   ░░░░░░░░░░░
+   ░░░░░░░░░░░░░░░░░░░    ░░░░░░░░░░░     ░░░░     ░░░░░░░    ░░░░░░░░░░░░░░
+  ░░░░░░░░░░░░░░░░░░░░   ░░░░░░░░░░░░░   ░░░░░░   ░░░░░░░  ░░░░░░░░░░░░░░░░░░
+  ░░░░░░       ░░░░░░░  ░░░░░░░░░░░░░░░  ░░░░░░   ░░░░░░  ░░░░░       ░░░░░░
+   ░░░░░░          ░░   ░░░░░░░  ░░░░░░░  ░░░░░░  ░░░░░  ░░░░░        ░░░░░░
+    ░░░░░░░░░░░░         ░░░░░     ░░░░░░  ░░░░░  ░░░░░  ░░░░░       ░░░░░░
+     ░░░░░░░░░░░░░░░░    ░░░░░░     ░░░░░  ░░░░░  ░░░░░   ░░░░░░░░░░░░░░░░
+           ░░░░░░░░░░░░   ░░░░░     ░░░░░  ░░░░░   ░░░░   ░░░░░░░░░░░░░
+                 ░░░░░░░░  ░░░░     ░░░░░  ░░░░░   ░░░░   ░░░░░░░
+       ░░░░░░      ░░░░░░   ░░░░    ░░░░░  ░░░░    ░░░░   ░░░░
+        ░░░░░░░    ░░░░░░░  ░░░░    ░░░░  ░░░░░    ░░░░   ░░░░
+         ░░░░░░░░░░░░░░░░░  ░░░░    ░░░░ ░░░░░     ░░░░  ░░░░░
+          ░░░░░░░░░░░░░░░░  ░░░░░  ░░░░  ░░░░░    ░░░░░  ░░░░░
+            ░░░░░░░░░░░░░  ░░░░░░░░░░░  ░░░░░     ░░░░░ ░░░░░░░
+               ░░░░░░░░    ░░░░░░░░░░░ ░░░░░░    ░░░░░  ░░░░░░░
+                          ░░░░░░░░░░░  ░░░░░░░  ░░░░░░  ░░░░░░
+                          ░░░░░░░░░░   ░░░░░░░░░░░░░░   ░░░░░
+                          ░░░░░░░░     ░░░░░░░░░░░░░
+                           ░░░░░░       ░░░░░░░░░░░
+                                           ░░░░░
+
+  ──────────────────────────────────────────────────────────────────────────────
+  :GLOUP SOUP INCUBATOR:
+  VOLUME 4 — STARTS 22 APR 2025
+
+  COME AND MAKE FILMS
+  ONE‑WORD THEME · 2 WEEKS DEADLINE
+  ──────────────────────────────────────────────────────────────────────────────
+   : DATE         : 22.06.2025
+   : DURATION     : 14 days
+   : LOCATION     : HACKNEY WICK
+   : CONTACT      : contact@theglitch.co
+   : IG           : @gloup.soup (or DM @szwyrz @j.e.starrs)
+  ──────────────────────────────────────────────────────────────────────────────
+
+   ═─[ O V E R V I E W ]────────────────────────────────────────────────────────
+   The Gloup Soup Incubator is a gathering of crew, filmmakers, artists, etc.
+   The aim is to create something based on a one word theme within two weeks.
+   The key to this is pitching something small, something that you could film
+   in half a day.
+
+   Put yourself in a role that you might not usually take on, try out an idea
+   that you aren’t certain about. Forget about your personal brand, being
+   audience facing, or how this might sell. This is a space to practice and mess
+   about, without stakes, and without judgement. Remember all those times you
+   knew you had a good idea but it grew to unmanageable proportions and ended up
+   in a drawer? This gives you the excuse to play with a low resolution version
+   of it to see what the process and the final result could be.
+
+   At the end of the two weeks all of the films will be screened in theglitch.co
+   in Hackney Wick, and we will decide on the next theme.
+
+   ═─[ T L ; D R ]──────────────────────────────────────────────────────────────
+    ⇛ KEEP IT SMALL   : If it takes > 1 day to shoot, shrink it.
+    ⇛ FAIL            : Perfect is the enemy of good.
+    ⇛ SHARE + SWAP    : Trade kit, knowledge, skills, techniques.
+    ⇛ DELIVERABLES    : ProRes422HQ MOV 1920x1080px 25fps.
+
+   ═─[ E T H O S ]──────────────────────────────────────────────────────────────
+   ⇛ This is more about process than a definitive result.
+      Attempt to step outside conventional filmmaking, in form and practice.
+   ⇛ Let the restrictions of time and feasibility embolden your creativity.
+      Your budget is zero, use what you can get for free.
+   ⇛ Embrace that an idea that might fail, and that it doesn’t matter.
+      Because nothing does.
+   ⇛ Bring ideas to the development session and be open minded about others.
+      This doesn’t need to be a fully formed piece. It can be a prop, a set piece,
+      a technique, or simply a mood. The egg can grow from there.
+   ⇛ Work across groups. Share and update everyone with the progress and problems
+      of production. We’re all here to help the ideas, we are not competing.
+   ⇛ Have fun.
+
+   ═─[ P R E V I O U S ]────────────────────────────────────────────────────────
+    Previous Volumes available for viewing upon request:
+
+      ⇛ VOL1  “NIGHTMARES”  (JAN-FEB 2025)
+      ⇛ VOL2  "LOVE"  (MAR 2025)
+      ⇛ VOL3  “ABSENCE”  (APR-MAY 2025)
+
+   ═─[ T H X ]──────────────────────────────────────────────────────────────────
+    Thank you to all of the people who make this possible.
+   ─────────────────────────────────────────────────────────────────────────────
+</pre>
+    </noscript>
+
+    <!-- Vite entry: loads React bundle compiled from /src/main.jsx -->
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
