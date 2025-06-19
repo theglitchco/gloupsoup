@@ -14,7 +14,7 @@ export default function GloupSoupFluidMultiTrail() {
   const SCALE = 0.5;            // simulation resolution factor
   const TRAIL_COUNT = 4;        // number of comet trails
   const TRAIL_RADIUS = 6;       // low‑res radius to inject energy
-  const TRAIL_DECAY = 0.94;     // ↑ faster fade (shorter tails)
+  const TRAIL_DECAY = 0.96;     // ↑ faster fade (shorter tails)
   const HEAD_INTENSITY = 1.2;   // brightness of comet heads
   const LOGO_BASE = 150;        // logo sampling grid
   const TEXT_DELAY = 500;       // ms before footer starts
@@ -247,8 +247,8 @@ export default function GloupSoupFluidMultiTrail() {
       if (HINT && Date.now() >= hintStart) {
         const baseX = mouse.x * canvas.width;
         const baseY = mouse.y * canvas.height;
-        ctx.font = "12px 'Press Start 2P', monospace";
-        const radius = 34;
+        ctx.font = "10px 'Press Start 2P', monospace";
+        const radius = 50;
         const t = Date.now() * 0.0005;
         const len = HINT.length;
         for (let i = 0; i < len; i++) {
