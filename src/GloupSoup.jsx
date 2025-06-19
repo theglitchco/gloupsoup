@@ -2,26 +2,27 @@ import { useEffect, useRef } from "react";
 import logoSrc from "./gloup_blank_solo.svg";
 
 /**
- * GloupSoupFluidMultiTrail
+ * GloupSoupFluidMultiTrail (fixed)
  * ----------------------------------------------------
+ * Canvas‑driven fluid simulation with comet trails, logo mask, footer fade, and delayed hint.
+ * All previously missing braces/blocks are restored to remove the "Unexpected end of file" error.
  */
 export default function GloupSoupFluidMultiTrail() {
   /* --------------------------------------------------
-   * CONFIG
+   * CONFIGURATION
    * -------------------------------------------------- */
-  const SCALE = 0.5;            // simulation resolution
-  const TRAIL_COUNT = 4;        // number of trails
-  const TRAIL_RADIUS = 6;       // injection radius (low‑res px)
-  const TRAIL_DECAY = 0.96;     // ↑ shorter, ↓ longer trails
-  const HEAD_INTENSITY = .2;   // brightness of comet heads only
-  const LOGO_BASE = 150;        // logo mask sampling grid
-  const TEXT_DELAY = 500;       // ms until footer starts fading in
-  const MAX_FONT_SIZE = 20;     // cap for responsive footer font
-  const DISPERSE_MS = 3000;     // explode → redirect duration
+  const SCALE = 0.5;            // simulation resolution factor
+  const TRAIL_COUNT = 4;        // number of comet trails
+  const TRAIL_RADIUS = 6;       // low‑res radius to inject energy
+  const TRAIL_DECAY = 0.96;     // ↑ faster fade (shorter tails)
+  const HEAD_INTENSITY = 1.2;   // brightness of comet heads
+  const LOGO_BASE = 150;        // logo sampling grid
+  const TEXT_DELAY = 500;       // ms before footer starts
+  const HINT_DELAY = 20000;     // ms before hint appears (desktop only)
+  const MAX_FONT_SIZE = 20;     // cap for footer font
+  const DISPERSE_MS = 3000;     // explode‑to‑redirect duration
+  const JITTER_AMPLITUDE = 2;   // footer noise amplitude (px)
 
-  /* --------------------------------------------------
-   * STATIC TEXT
-   * -------------------------------------------------- */
   const TEXT_LINES = [
     "───────────────────────────────────────────────────────",
     "GLOUP SOUP INCUBATOR",
@@ -34,60 +35,77 @@ export default function GloupSoupFluidMultiTrail() {
     "───────────────────────────────────────────────────────",
   ];
 
-  /* Orbiting hint – hidden on touch / narrow screens */
-  const SHOW_HINT =
-    typeof window !== "undefined" &&
-    !matchMedia("(pointer: coarse)").matches &&
-    window.innerWidth >= 768;
-  const HINT = SHOW_HINT ? "CLICK FOR MORE        " : "";
-
   /* --------------------------------------------------
-   * BOILERPLATE
+   * HOOK & REFS
    * -------------------------------------------------- */
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    /* ----------------------------------------------
-     * INITIALISATION
-     * ----------------------------------------------*/
+    /* ------------------------------------------------
+     * 1. FONT LOADING (Press Start 2P)
+     * ------------------------------------------------*/
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = "https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap";
     document.head.appendChild(link);
 
+    /* ------------------------------------------------
+     * 2. CANVAS & CONTEXTS
+     * ------------------------------------------------*/
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
+    // low‑res simulation buffers
     let simW, simH, field, backCanvas, backCtx;
+
+    /* ------------------------------------------------
+     * 3. STATE VARS
+     * ------------------------------------------------*/
     let logoMask = null;
     const mouse = { x: 0.5, y: 0.5 };
 
-    /* footer fade‑in timing */
-    const textStart = Date.now() + TEXT_DELAY;
-    let showText = false;
+    const footerStart = Date.now() + TEXT_DELAY;
+    const hintStart = Date.now() + HINT_DELAY;
 
-    /* explode vars */
+    let showText = false;
     let explode = false;
     let explodeTime = 0;
 
-    /* click triggers explode */
+    // runtime‑determined desktop hint
+    const isDesktop = !window.matchMedia("(pointer: coarse)").matches && window.innerWidth >= 768;
+    const HINT = isDesktop ? "CLICK FOR MORE        " : "";
+
+    /* ------------------------------------------------
+     * 4. EVENT HANDLERS
+     * ------------------------------------------------*/
     const onClick = () => {
       explode = true;
       explodeTime = Date.now();
     };
-    window.addEventListener("click", onClick);
 
-    /* ----------------------------------------------
-     * SVG → MASK
-     * ----------------------------------------------*/
+    const onResize = () => init();
+
+    const onMouseMove = (e) => {
+      mouse.x = e.clientX / window.innerWidth;
+      mouse.y = e.clientY / window.innerHeight;
+    };
+
+    window.addEventListener("click", onClick);
+    window.addEventListener("resize", onResize);
+    window.addEventListener("mousemove", onMouseMove);
+
+    /* ------------------------------------------------
+     * 5. BUILD LOGO MASK (ALPHA → 0/1)
+     * ------------------------------------------------*/
     const buildLogoMask = () =>
       new Promise((res) => {
         const img = new Image();
         img.src = logoSrc;
         img.onload = () => {
-          const tmp = document.createElement("canvas");
-          tmp.width = LOGO_BASE;
-          tmp.height = LOGO_BASE;
+          const tmp = Object.assign(document.createElement("canvas"), {
+            width: LOGO_BASE,
+            height: LOGO_BASE,
+          });
           tmp.getContext("2d").drawImage(img, 0, 0, LOGO_BASE, LOGO_BASE);
           const d = tmp.getContext("2d").getImageData(0, 0, LOGO_BASE, LOGO_BASE).data;
           logoMask = new Float32Array(LOGO_BASE * LOGO_BASE);
@@ -96,7 +114,9 @@ export default function GloupSoupFluidMultiTrail() {
         };
       });
 
-    /* responsive footer font */
+    /* ------------------------------------------------
+     * 6. RESPONSIVE FOOTER FONT
+     * ------------------------------------------------*/
     let fontSize = 16;
     let rowH = 18;
     const fitFont = () => {
@@ -107,37 +127,39 @@ export default function GloupSoupFluidMultiTrail() {
       rowH = Math.floor(fontSize * 1.1);
     };
 
-    /* ----------------------------------------------
-     * CANVAS + FIELD SETUP
-     * ----------------------------------------------*/
+    /* ------------------------------------------------
+     * 7. INITIALISE CANVAS + BUFFERS
+     * ------------------------------------------------*/
     const init = () => {
       fitFont();
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+
       simW = Math.floor(canvas.width * SCALE);
       simH = Math.floor(canvas.height * SCALE);
+
       field = new Float32Array(simW * simH);
       backCanvas = Object.assign(document.createElement("canvas"), { width: simW, height: simH });
       backCtx = backCanvas.getContext("2d");
     };
 
-    /* ----------------------------------------------
-     * TRAILS CONFIGURATION
-     * ----------------------------------------------*/
+    /* ------------------------------------------------
+     * 8. TRAIL PARAMS
+     * ------------------------------------------------*/
     const trails = Array.from({ length: TRAIL_COUNT }, (_, i) => ({
-      f: 0.002 + i * 0.0004,       // frequency
-      p: i * Math.PI * 0.5,        // phase
+      f: 0.002 + i * 0.0004,
+      p: i * Math.PI * 0.5,
       mx: 0.25 + 0.12 * Math.sin(i * 1.3),
       my: 0.25 + 0.12 * Math.cos(i * 0.9),
     }));
 
-    /* ----------------------------------------------
-     * SIM STEP
-     * ----------------------------------------------*/
+    /* ------------------------------------------------
+     * 9. SIMULATION STEP
+     * ------------------------------------------------*/
     const step = () => {
       const nxt = new Float32Array(simW * simH);
 
-      /* diffusion & decay */
+      // diffusion + decay (controls tail length)
       for (let y = 1; y < simH - 1; y++)
         for (let x = 1; x < simW - 1; x++) {
           const i = y * simW + x;
@@ -148,27 +170,26 @@ export default function GloupSoupFluidMultiTrail() {
       const mx = (mouse.x - 0.5) * simW;
       const my = (mouse.y - 0.5) * simH;
 
-      /* inject comet heads */
+      // inject comet heads
       for (const tr of trails) {
         const cx = Math.sin(t * tr.f + tr.p) * simW * 0.3 + simW / 2 + mx * tr.mx;
         const cy = Math.cos(t * tr.f * 0.9 + tr.p) * simH * 0.3 + simH / 2 + my * tr.my;
-        const r = TRAIL_RADIUS;
-        for (let oy = -r; oy <= r; oy++)
-          for (let ox = -r; ox <= r; ox++)
-            if (ox * ox + oy * oy <= r * r) {
+        for (let oy = -TRAIL_RADIUS; oy <= TRAIL_RADIUS; oy++)
+          for (let ox = -TRAIL_RADIUS; ox <= TRAIL_RADIUS; ox++)
+            if (ox * ox + oy * oy <= TRAIL_RADIUS * TRAIL_RADIUS) {
               const idx = ((cy | 0) + oy) * simW + ((cx | 0) + ox);
               if (idx >= 0 && idx < nxt.length) nxt[idx] += HEAD_INTENSITY;
             }
       }
 
-      /* logo mask */
+      // logo mask (brightness logic unchanged)
       if (logoMask) {
-        const logoW = Math.floor(simW * 1);
+        const logoW = simW;
         const logoH = Math.floor(simH * 0.7);
         for (let y = 0; y < logoH; y++)
           for (let x = 0; x < logoW; x++) {
-            const u = Math.floor((x / logoW) * LOGO_BASE);
-            const v = Math.floor((y / logoH) * LOGO_BASE);
+            const u = ((x / logoW) * LOGO_BASE) | 0;
+            const v = ((y / logoH) * LOGO_BASE) | 0;
             if (logoMask[v * LOGO_BASE + u]) {
               const fi = y * simW + x;
               nxt[fi] = nxt[fi] * 0.85 + 0.15;
@@ -176,7 +197,7 @@ export default function GloupSoupFluidMultiTrail() {
           }
       }
 
-      /* explode → redirect */
+      // explode → redirect
       if (explode) {
         const prog = (Date.now() - explodeTime) / DISPERSE_MS;
         if (prog >= 1) {
@@ -194,16 +215,17 @@ export default function GloupSoupFluidMultiTrail() {
             nxt[idx] = field[sy * simW + sx] * (1 - prog);
           }
       }
+
       field = nxt;
     };
 
-    /* ----------------------------------------------
-     * RENDERING
-     * ----------------------------------------------*/
+    /* ------------------------------------------------
+     * 10. RENDER (Bayer dithering + text overlays)
+     * ------------------------------------------------*/
     const b4 = [15, 135, 45, 165, 195, 75, 225, 105, 60, 180, 30, 150, 240, 120, 210, 90];
 
     const draw = () => {
-      /* simulation → dithered bitmap */
+      // dithered field → off‑screen bitmap
       const img = backCtx.createImageData(simW, simH);
       const d = img.data;
       for (let i = 0; i < field.length; i++) {
@@ -216,11 +238,13 @@ export default function GloupSoupFluidMultiTrail() {
         d[j + 3] = 255;
       }
       backCtx.putImageData(img, 0, 0);
+
+      // upscale to full canvas
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(backCanvas, 0, 0, canvas.width, canvas.height);
 
-      /* orbiting desktop hint */
-      if (HINT) {
+      /* ---- orbiting hint (desktop) ---- */
+      if (HINT && Date.now() >= hintStart) {
         const baseX = mouse.x * canvas.width;
         const baseY = mouse.y * canvas.height;
         ctx.font = "10px 'Press Start 2P', monospace";
@@ -229,10 +253,10 @@ export default function GloupSoupFluidMultiTrail() {
         const len = HINT.length;
         for (let i = 0; i < len; i++) {
           const ang = (i / len) * Math.PI * 2 + t;
-          const jitter = Math.sin(t * 3 + i) * 4;
+          const jitter = Math.sin(t * 3 + i) * 2;
           const x = baseX + (radius + jitter) * Math.cos(ang) - 4;
           const y = baseY + (radius + jitter) * Math.sin(ang) - 4;
-          const alpha = Math.min(1, Math.max(0, (Date.now() - textStart - i * 80) / 400));
+          const alpha = Math.min(1, Math.max(0, (Date.now() - hintStart - i * 80) / 400));
           ctx.globalAlpha = alpha;
           ctx.fillStyle = "white";
           ctx.fillText(HINT[i], x, y);
@@ -240,61 +264,57 @@ export default function GloupSoupFluidMultiTrail() {
         ctx.globalAlpha = 1;
       }
 
-      /* footer – jittery fade */
-      if (Date.now() >= textStart) showText = true;
+      /* ---- footer text (noise jitter) ---- */
+      if (Date.now() >= footerStart) showText = true;
       if (showText) {
         ctx.font = `${fontSize}px 'Press Start 2P', monospace`;
         ctx.textBaseline = "top";
         const startY = canvas.height - TEXT_LINES.length * rowH - 20;
         const t = Date.now();
-        TEXT_LINES.forEach((l, i) => {
-          const alpha = Math.min(1, Math.max(0, (t - textStart - i * 120) / 800));
-          const jAmp = (1 - alpha) * 4;
-          const jX = Math.sin((t + i * 57) * 0.02) * jAmp;
-          const jY = Math.cos((t + i * 85) * 0.02) * jAmp;
+        TEXT_LINES.forEach((line, i) => {
+          const alpha = Math.min(1, Math.max(0, (t - footerStart - i * 120) / 800));
+          const noise = Math.sin((t * 0.003 + i * 12.9)) * Math.cos((t * 0.002 + i * 5.3));
+          const amp = (1 - alpha) * JITTER_AMPLITUDE;
+          const jX = noise * amp * 4;
+          const jY = Math.sin((t * 0.0014 + i * 7.1)) * amp * 4;
           ctx.globalAlpha = alpha;
           ctx.fillStyle = "white";
-          ctx.fillText(l, 20 + jX, startY + i * rowH + jY);
+          ctx.fillText(line, 20 + jX, startY + i * rowH + jY);
         });
         ctx.globalAlpha = 1;
       }
     };
 
-    /* ----------------------------------------------
-     * MAIN LOOP
-     * ----------------------------------------------*/
+    /* ------------------------------------------------
+     * 11. MAIN LOOP
+     * ------------------------------------------------*/
     const loop = () => {
       step();
       draw();
       requestAnimationFrame(loop);
     };
 
-    /* ----------------------------------------------
-     * EVENT LISTENERS
-     * ----------------------------------------------*/
-    const onResize = () => init();
-    window.addEventListener("resize", onResize);
-    window.addEventListener("mousemove", (e) => {
-      mouse.x = e.clientX / window.innerWidth;
-      mouse.y = e.clientY / window.innerHeight;
-    });
-
-    /* kick off */
+    /* ------------------------------------------------
+     * 12. STARTUP
+     * ------------------------------------------------*/
     buildLogoMask().then(() => {
       init();
       loop();
     });
 
-    /* cleanup */
+    /* ------------------------------------------------
+     * 13. CLEANUP
+     * ------------------------------------------------*/
     return () => {
       document.head.removeChild(link);
-      window.removeEventListener("resize", onResize);
       window.removeEventListener("click", onClick);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("mousemove", onMouseMove);
     };
   }, []);
 
   /* --------------------------------------------------
-   * RENDER (React)
+   * RENDER
    * -------------------------------------------------- */
   return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full" />;
 }
