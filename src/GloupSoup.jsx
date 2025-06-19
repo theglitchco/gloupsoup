@@ -140,7 +140,7 @@ export default function GloupSoupFluidMultiTrail() {
 
       // subtle logo brighten mask
       if (logoMask) {
-        const logoW = Math.floor(simW * 0.15), logoH = Math.floor(simH * 0.15);
+        const logoW = Math.floor(simW * 1), logoH = Math.floor(simH * 0.7);
         for (let y = 0; y < logoH; y++)
           for (let x = 0; x < logoW; x++) {
             const u = ((x / logoW) * LOGO_BASE) | 0;
