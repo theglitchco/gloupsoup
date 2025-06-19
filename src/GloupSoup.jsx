@@ -234,8 +234,6 @@ export default function GloupSoupFluidMultiTrail() {
       }
     };
 
-    const loop = () => { step(); draw(); requestAnimationFrame(loop); };
-
     /* 8. MAIN LOOP + LISTENERS ---------------------------------- */
     const loop = () => { step(); draw(); requestAnimationFrame(loop); };
 
