@@ -20,7 +20,7 @@ export default function GloupSoupFluidMultiTrail() {
   const TEXT_DELAY = 500;       // ms before footer starts
   const HINT_DELAY = 20000;     // ms before hint appears (desktop only)
   const MAX_FONT_SIZE = 20;     // cap for footer font
-  const DISPERSE_MS = 3000;     // explode‑to‑redirect duration
+  const DISPERSE_MS = 1000;     // explode‑to‑redirect duration
   const JITTER_AMPLITUDE = 2;   // footer noise amplitude (px)
 
   const TEXT_LINES = [
@@ -201,7 +201,7 @@ export default function GloupSoupFluidMultiTrail() {
       if (explode) {
         const prog = (Date.now() - explodeTime) / DISPERSE_MS;
         if (prog >= 1) {
-          window.location.href = "https://theglitch.co";
+          window.location.href = "https://behind.theglitch.co/gloup-soup/gloup-soup-incubator/";
           return;
         }
         const maxShift = simW * 0.3 * prog;
