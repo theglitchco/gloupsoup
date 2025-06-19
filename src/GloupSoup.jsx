@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import logoSrc from "./gloup_blank_solo.svg";
 
 /**
- * Gloup‑Soup Incubator Canvas — v7.2
+ * Gloup Soup fluid canvas — v7.3
  */
 
 export default function GloupSoupFluidMultiTrail() {
@@ -129,16 +129,28 @@ export default function GloupSoupFluidMultiTrail() {
             }
       }
 
-      // logo interaction – local bulge when trails sweep over logo
+      // logo interaction – constant visibility + local bulge where trails pass
       if (logoMask) {
-        const w = Math.floor(simW * 0.15), h = Math.floor(simH * 0.15);
-        const warpField = new Float32Array(w * h); // reset each step
+        const w = Math.floor(simW * 1), h = Math.floor(simH * 0.7);
 
-        /* accumulate bulge influence from each trail centre */
+        /* 1) baseline logo brightness so it's always visible */
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const u = ((x / w) * LOGO_BASE) | 0;
+            const v = ((y / h) * LOGO_BASE) | 0;
+            if (logoMask[v * LOGO_BASE + u]) {
+              const fi = y * simW + x;
+              nxt[fi] = nxt[fi] * 0.95 + 0.05; // 15 % brighten, no dark flicker
+            }
+          }
+        }
+
+        /* 2) compute bulge only where a trail sweeps over */
+        const warpField = new Float32Array(w * h);
         for (const tr of trails) {
           const cx = Math.sin(t * tr.f + tr.p) * w * 0.3 + w / 2 + (mx * tr.mx) * (w / simW);
           const cy = Math.cos(t * tr.f * 0.9 + tr.p) * h * 0.3 + h / 2 + (my * tr.my) * (h / simH);
-          const br = 6; // influence radius inside logo pixels
+          const br = 6;
           for (let oy = -br; oy <= br; oy++)
             for (let ox = -br; ox <= br; ox++)
               if (ox * ox + oy * oy <= br * br) {
@@ -146,31 +158,23 @@ export default function GloupSoupFluidMultiTrail() {
                 if (lx >= 0 && lx < w && ly >= 0 && ly < h) {
                   const li = ly * w + lx;
                   const d = Math.hypot(ox, oy);
-                  warpField[li] = Math.max(warpField[li], 1 - d / br); // 0..1 peak at centre
+                  warpField[li] = Math.max(warpField[li], 1 - d / br);
                 }
               }
         }
 
-        /* apply bulge + slight brightness where warpField > 0 */
+        /* 3) apply local inflate + extra brightness */
         for (let y = 0; y < h; y++) {
           for (let x = 0; x < w; x++) {
-            const u = ((x / w) * LOGO_BASE) | 0;
-            const v = ((y / h) * LOGO_BASE) | 0;
-            if (!logoMask[v * LOGO_BASE + u]) continue;
-
-            const bulge = warpField[y * w + x]; // 0..1
+            const bulge = warpField[y * w + x];
             if (bulge === 0) continue;
-
-            // scale outward more at the centre of bulge
-            const scale = 1 + 0.15 * bulge; // up to +15% inflate locally
+            const scale = 1 + 0.15 * bulge;
             const dx = (x - w / 2) * scale + w / 2;
             const dy = (y - h / 2) * scale + h / 2;
             const uu = ((dx / w) * LOGO_BASE) | 0;
             const vv = ((dy / h) * LOGO_BASE) | 0;
             if (!logoMask[vv * LOGO_BASE + uu]) continue;
-
             const fi = y * simW + x;
-            // keep original pixel but add a touch of brightness
             nxt[fi] = Math.min(1, nxt[fi] + 0.05 * bulge);
           }
         }
@@ -246,61 +250,30 @@ export default function GloupSoupFluidMultiTrail() {
       }
     };
 
-    /* 8. MAIN LOOP + LISTENERS ---------------------------------- */
     const loop = () => { step(); draw(); requestAnimationFrame(loop); };
 
-    /* — window resize — */
+    /* LISTENERS */
     const onResize = () => init();
     window.addEventListener("resize", onResize);
-
-    /* — mouse pointer — */
-    window.addEventListener("mousemove", e => {
+    window.addEventListener("mousemove", (e) => {
       mouse.x = e.clientX / window.innerWidth;
       mouse.y = e.clientY / window.innerHeight;
     });
-
-    /* — click-to-explode — */
     window.addEventListener("click", () => { explode = true; explodeT = Date.now(); });
 
-    /* -------- G Y R O --------
-     * iOS (>= 13) requires a user-gesture + permission prompt.
-     * Android fires immediately. We enable on first touch/click.          */
-    let gyroEnabled = false;
     const onOrient = (e) => {
-      /* gamma: left/right -90‒90,   beta: front/back -180‒180
-         map to ±0.5, then trails amplify it internally               */
-      tilt.x = (e.gamma ?? 0) / 90 * 0.5;   // stronger X
-      tilt.y = (e.beta  ?? 0) / 180;        // softer Y
+      tilt.x = (e.gamma || 0) / 180; // -0.5..0.5
+      tilt.y = (e.beta || 0) / 180;
     };
-    const enableGyro = () => {
-      if (gyroEnabled || !window.DeviceOrientationEvent) return;
-      /* iOS secure-origin permission flow */
-      if (typeof DeviceOrientationEvent.requestPermission === "function") {
-        DeviceOrientationEvent.requestPermission()
-          .then((resp) => { if (resp === "granted") {
-            window.addEventListener("deviceorientation", onOrient, true);
-            gyroEnabled = true;
-          }});
-      } else {
-        /* Android / desktop with sensors */
-        window.addEventListener("deviceorientation", onOrient, true);
-        gyroEnabled = true;
-      }
-    };
-    /* first user interaction (touchstart covers mobiles that never send click) */
-    window.addEventListener("touchstart", enableGyro, { once: true });
-    window.addEventListener("click",      enableGyro, { once: true });
+    if (window.DeviceOrientationEvent) window.addEventListener("deviceorientation", onOrient);
 
-    /* -------- run -------- */
     buildLogoMask().then(() => { init(); loop(); });
 
-    /* cleanup */
     return () => {
       document.head.removeChild(link);
       window.removeEventListener("resize", onResize);
-      if (gyroEnabled) window.removeEventListener("deviceorientation", onOrient, true);
+      window.removeEventListener("deviceorientation", onOrient);
     };
-
   }, []);
 
   return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full" />;
