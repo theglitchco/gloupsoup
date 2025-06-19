@@ -130,19 +130,39 @@ export default function GloupSoupFluidMultiTrail() {
             }
       }
 
-      // logo pulse
+      // logo-heartbeat: subtle brightness + “inflating” bulge
       if (logoMask) {
-        const phase = (t % HEART_PERIOD) / HEART_PERIOD;
-        const beat = Math.exp(-40 * (phase - 0.05) ** 2) + 0.6 * Math.exp(-40 * (phase - 0.45) ** 2);
-        const pulse = 1 - HEART_AMPL * beat;
-        const w = Math.floor(simW * 0.15), h = Math.floor(simH * 0.15);
-        for (let y = 0; y < h; y++)
+        const rel   = (t % HEART_PERIOD) / HEART_PERIOD;         // 0‒1
+        const beat  = Math.exp(-40 * (rel - 0.05) ** 2)          // first thump
+                    + 0.6 * Math.exp(-40 * (rel - 0.45) ** 2);   // weaker second
+        const grow  = 1 + HEART_AMPL * beat;       // scale factor 1.00-1.05
+        const glow  = 0.02 * beat;                 // ≤ 2 % extra brightness
+
+        const w = Math.floor(simW * 0.15),
+              h = Math.floor(simH * 0.15),
+              cx = w / 2,
+              cy = h / 2,
+              maxR = Math.hypot(cx, cy);
+
+        for (let y = 0; y < h; y++) {
+          const dy = y - cy;
           for (let x = 0; x < w; x++) {
-            const u = ((x / w) * LOGO_BASE) | 0;
-            const v = ((y / h) * LOGO_BASE) | 0;
-            if (logoMask[v * LOGO_BASE + u]) nxt[y * simW + x] = nxt[y * simW + x] * pulse + (1 - pulse);
+            const dx = x - cx;
+            const r  = Math.hypot(dx, dy);
+            // radially inflate: map screen-pixel (x,y) to mask-pixel (sx,sy)
+            const scale = 1 / (grow - (grow - 1) * (r / maxR));   // centre moves most
+            const sx = ((dx * scale + cx) / w * LOGO_BASE) | 0;
+            const sy = ((dy * scale + cy) / h * LOGO_BASE) | 0;
+
+            if (logoMask[sy * LOGO_BASE + sx]) {
+              const fi = y * simW + x;
+              // keep original brightness, add ≤2 % extra, never fully black
+              nxt[fi] = Math.min(1, nxt[fi] + glow);
+            }
           }
+        }
       }
+
 
       // explode
       if (explode) {
