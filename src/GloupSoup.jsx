@@ -255,19 +255,31 @@ export default function GloupSoupFluidMultiTrail() {
     /* LISTENERS */
     const onResize = () => init();
     window.addEventListener("resize", onResize);
+
+    /* desktop pointer */
     window.addEventListener("mousemove", (e) => {
       mouse.x = e.clientX / window.innerWidth;
       mouse.y = e.clientY / window.innerHeight;
     });
+
+    /* mobile touch drag → steer trails */
+    window.addEventListener("touchmove", (e) => {
+      const t = e.touches[0];
+      mouse.x = t.clientX / window.innerWidth;
+      mouse.y = t.clientY / window.innerHeight;
+    }, { passive: true });
+
     window.addEventListener("click", () => { explode = true; explodeT = Date.now(); });
 
+    /* optional gyro (kept but doesn't require permission) */
     const onOrient = (e) => {
-      tilt.x = (e.gamma || 0) / 180; // -0.5..0.5
-      tilt.y = (e.beta || 0) / 180;
+      tilt.x = (e.gamma || 0) / 180;
+      tilt.y = (e.beta  || 0) / 180;
     };
     if (window.DeviceOrientationEvent) window.addEventListener("deviceorientation", onOrient);
 
-    buildLogoMask().then(() => { init(); loop(); });
+    /* RUN */
+    buildLogoMask().then(() => { init(); loop(); });().then(() => { init(); loop(); });
 
     return () => {
       document.head.removeChild(link);
