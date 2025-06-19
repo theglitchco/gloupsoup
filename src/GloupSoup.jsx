@@ -241,7 +241,7 @@ export default function GloupSoupFluidMultiTrail() {
 
       /* --- footer text --- */
       if (showText) {
-        ctx.font = ${fontSize}px 'Press Start 2P', monospace;
+        ctx.font = `${fontSize}px 'Press Start 2P', monospace`;
         ctx.fillStyle = "white";
         ctx.textBaseline = "top";
         const startY = canvas.height - TEXT_LINES.length * rowH - 20;
