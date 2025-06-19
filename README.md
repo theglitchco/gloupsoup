@@ -48,7 +48,7 @@
 
 ──────────────────────────────────────────────────────────────────────────────
 :GLOUP SOUP INCUBATOR:
-VOLUME 4 — STARTS 22 APR 2025
+VOLUME 4 — STARTS 22 JUNE 2025
 
 COME AND MAKE FILMS
 ONE‑WORD THEME · 2 WEEKS DEADLINE

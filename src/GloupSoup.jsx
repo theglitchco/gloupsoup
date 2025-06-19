@@ -26,7 +26,7 @@ export default function GloupSoupFluidMultiTrail() {
   const TEXT_LINES = [
     "───────────────────────────────────────────────────────",
     "GLOUP SOUP INCUBATOR",
-    "VOLUME 4 STARTS 22nd APRIL 2025",
+    "VOLUME 4 STARTS 22nd JUNE 2025",
     "COME AND MAKE FILMS",
     "ONE WORD THEME · 2 WEEKS DEADLINE",
     "IG @GLOUP.SOUP",
