@@ -14,8 +14,8 @@ export default function GloupSoupFluidMultiTrail() {
   const SCALE = 0.5;            // simulation resolution factor
   const TRAIL_COUNT = 4;        // number of comet trails
   const TRAIL_RADIUS = 6;       // low‑res radius to inject energy
-  const TRAIL_DECAY = 0.94;     // ↑ faster fade (shorter tails)
-  const HEAD_INTENSITY = 1;   // brightness of comet heads
+  const TRAIL_DECAY = 0.96;     // ↑ faster fade (shorter tails)
+  const HEAD_INTENSITY = 1.2;   // brightness of comet heads
   const LOGO_BASE = 150;        // logo sampling grid
   const TEXT_DELAY = 500;       // ms before footer starts
   const HINT_DELAY = 20000;     // ms before hint appears (desktop only)
