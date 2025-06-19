@@ -2,8 +2,7 @@ import { useEffect, useRef } from "react";
 import logoSrc from "./gloup_blank_solo.svg";
 
 /**
- * Gloup‑Soup fluid canvas — v3.3 (build‑proof)
- * Clean compile: draw() is fully closed, component exports correctly.
+ * Gloup‑Soup Incubator Canvas — v7.2
  */
 
 export default function GloupSoupFluidMultiTrail() {
@@ -130,39 +129,52 @@ export default function GloupSoupFluidMultiTrail() {
             }
       }
 
-      // logo-heartbeat: subtle brightness + “inflating” bulge
+      // logo interaction – local bulge when trails sweep over logo
       if (logoMask) {
-        const rel   = (t % HEART_PERIOD) / HEART_PERIOD;         // 0‒1
-        const beat  = Math.exp(-40 * (rel - 0.05) ** 2)          // first thump
-                    + 0.6 * Math.exp(-40 * (rel - 0.45) ** 2);   // weaker second
-        const grow  = 1 + HEART_AMPL * beat;       // scale factor 1.00-1.05
-        const glow  = 0.02 * beat;                 // ≤ 2 % extra brightness
+        const w = Math.floor(simW * 0.15), h = Math.floor(simH * 0.15);
+        const warpField = new Float32Array(w * h); // reset each step
 
-        const w = Math.floor(simW * 1),
-              h = Math.floor(simH * 0.7),
-              cx = w / 2,
-              cy = h / 2,
-              maxR = Math.hypot(cx, cy);
+        /* accumulate bulge influence from each trail centre */
+        for (const tr of trails) {
+          const cx = Math.sin(t * tr.f + tr.p) * w * 0.3 + w / 2 + (mx * tr.mx) * (w / simW);
+          const cy = Math.cos(t * tr.f * 0.9 + tr.p) * h * 0.3 + h / 2 + (my * tr.my) * (h / simH);
+          const br = 6; // influence radius inside logo pixels
+          for (let oy = -br; oy <= br; oy++)
+            for (let ox = -br; ox <= br; ox++)
+              if (ox * ox + oy * oy <= br * br) {
+                const lx = (cx | 0) + ox, ly = (cy | 0) + oy;
+                if (lx >= 0 && lx < w && ly >= 0 && ly < h) {
+                  const li = ly * w + lx;
+                  const d = Math.hypot(ox, oy);
+                  warpField[li] = Math.max(warpField[li], 1 - d / br); // 0..1 peak at centre
+                }
+              }
+        }
 
+        /* apply bulge + slight brightness where warpField > 0 */
         for (let y = 0; y < h; y++) {
-          const dy = y - cy;
           for (let x = 0; x < w; x++) {
-            const dx = x - cx;
-            const r  = Math.hypot(dx, dy);
-            // radially inflate: map screen-pixel (x,y) to mask-pixel (sx,sy)
-            const scale = 1 / (grow - (grow - 1) * (r / maxR));   // centre moves most
-            const sx = ((dx * scale + cx) / w * LOGO_BASE) | 0;
-            const sy = ((dy * scale + cy) / h * LOGO_BASE) | 0;
+            const u = ((x / w) * LOGO_BASE) | 0;
+            const v = ((y / h) * LOGO_BASE) | 0;
+            if (!logoMask[v * LOGO_BASE + u]) continue;
 
-            if (logoMask[sy * LOGO_BASE + sx]) {
-              const fi = y * simW + x;
-              // keep original brightness, add ≤2 % extra, never fully black
-              nxt[fi] = Math.min(1, nxt[fi] + glow);
-            }
+            const bulge = warpField[y * w + x]; // 0..1
+            if (bulge === 0) continue;
+
+            // scale outward more at the centre of bulge
+            const scale = 1 + 0.15 * bulge; // up to +15% inflate locally
+            const dx = (x - w / 2) * scale + w / 2;
+            const dy = (y - h / 2) * scale + h / 2;
+            const uu = ((dx / w) * LOGO_BASE) | 0;
+            const vv = ((dy / h) * LOGO_BASE) | 0;
+            if (!logoMask[vv * LOGO_BASE + uu]) continue;
+
+            const fi = y * simW + x;
+            // keep original pixel but add a touch of brightness
+            nxt[fi] = Math.min(1, nxt[fi] + 0.05 * bulge);
           }
         }
       }
-
 
       // explode
       if (explode) {
