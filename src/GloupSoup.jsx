@@ -141,7 +141,7 @@ export default function GloupSoupFluidMultiTrail() {
             const v = ((y / h) * LOGO_BASE) | 0;
             if (!logoMask[v * LOGO_BASE + u]) continue;
             const fi = y * simW + x;
-            nxt[fi] = nxt[fi] * 1;
+            nxt[fi] = nxt[fi] * 0.95 + 0.05;
           }
       }
 
@@ -194,16 +194,19 @@ export default function GloupSoupFluidMultiTrail() {
         }
       }
 
-      // footer fade-in
-      const now = Date.now();
-      if (now >= textStart) {
-        const fade = Math.min(1, (now - textStart) / TEXT_FADE_MS);
-        ctx.font = `${fontSize}px 'Press Start 2P', monospace`;
-        ctx.fillStyle = "white";
-        const startY = canvas.height - rowH * TEXT_LINES.length - 20;
-        ctx.globalAlpha = fade;
-        TEXT_LINES.forEach((l, i) => ctx.fillText(l, 20, startY + i * rowH));
-        ctx.globalAlpha = 1;
+      // 7.3 footer text (fade + slight jitter distortion)
+      if(Date.now()>=textStart){
+        const fade=Math.min(1,(Date.now()-textStart)/TEXT_FADE_MS);
+        ctx.font=`${fontSize}px 'Press Start 2P', monospace`;
+        ctx.fillStyle="white";
+        const startY=canvas.height-rowH*TEXT_LINES.length-20;
+        TEXT_LINES.forEach((l,i)=>{
+          // per-line horizontal jitter that eases out as fade completes
+          const jitter=(1-fade)*3*Math.sin(i*1.3+Date.now()*0.01);
+          ctx.globalAlpha=fade;
+          ctx.fillText(l,20+jitter,startY+i*rowH);
+        });
+        ctx.globalAlpha=1;
       }
     };
 
