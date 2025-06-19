@@ -138,8 +138,8 @@ export default function GloupSoupFluidMultiTrail() {
         const grow  = 1 + HEART_AMPL * beat;       // scale factor 1.00-1.05
         const glow  = 0.02 * beat;                 // ≤ 2 % extra brightness
 
-        const w = Math.floor(simW * 0.15),
-              h = Math.floor(simH * 0.15),
+        const w = Math.floor(simW * 1),
+              h = Math.floor(simH * 0.7),
               cx = w / 2,
               cy = h / 2,
               maxR = Math.hypot(cx, cy);
