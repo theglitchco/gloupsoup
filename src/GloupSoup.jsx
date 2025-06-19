@@ -2,29 +2,32 @@ import { useEffect, useRef } from "react";
 import logoSrc from "./gloup_blank_solo.svg";
 
 /**
- * Gloup-Soup Fluid Canvas — baseline v3.7 (compiles)
- * • static dithered logo (top-left)
- * • 4 fluid trails, steerable by mouse + touch drag
- * • optional deviceorientation sway (no permission prompt)
- * • click anywhere → disperse + redirect after 3 s
+ * GLOUP SOUP FLUID‑TRAIL CANVAS (with text fade, phone-friendly hint, softer heads)
+ * SECTION MAP
+ *   1. CONFIG
+ *   2. DOM + FONT
+ *   3. RESPONSIVE FONT
+ *   4. INIT / RESIZE
+ *   5. TRAILS PARAMS
+ *   6. SIM STEP (includes softer trail heads)
+ *   7. DRAW (dither, orbit hint (desktop only), distorted fade‑in text)
+ *   8. LOOP + LISTENERS
  */
 
 export default function GloupSoupFluidMultiTrail() {
   const canvasRef = useRef(null);
 
-  /* === CONFIG === */
-  const SCALE         = 0.5;   // simulation resolution
-  const TRAIL_COUNT   = 4;
-  const TRAIL_RADIUS  = 6;
-  const LOGO_BASE     = 150;
-  const TEXT_DELAY    = 500;
-  const TEXT_FADE_MS  = 1200;
-  const HINT_DELAY_MS = 20000;
-  const DISPERSE_MS   = 3000;
-  const MAX_FONT      = 20;
-  const MOBILE_BREAK  = 768;
-  const FIELD_BRIGHT  = 150;
-  const TRAIL_ENERGY  = 0.8;
+  /* === 1. CONFIG ==================================== */
+  const SCALE = 0.5;
+  const TRAIL_COUNT = 4;
+  const TRAIL_RADIUS = 6;
+  const LOGO_BASE = 150;
+  const TEXT_DELAY = 500;        // ms until text fade starts
+  const TEXT_FADE_MS = 1200;     // fade‑in duration
+  const MAX_FONT_SIZE = 20;
+  const DISPERSE_MS = 3000;
+  const HINT_DELAY = 20000;
+  const HINT_HIDE_MAX_W = 600;   // hide hint when viewport ≤ this width
 
   const TEXT_LINES = [
     "───────────────────────────────────────────────────────",
@@ -39,90 +42,91 @@ export default function GloupSoupFluidMultiTrail() {
   ];
   const HINT = "CLICK FOR MORE        ";
 
+  /* === 2. DOM + FONT SETUP ========================== */
   useEffect(() => {
-    /* 1. load pixel font */
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = "https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap";
     document.head.appendChild(link);
 
-    /* 2. canvas handles */
     const canvas = canvasRef.current;
-    const ctx    = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d");
 
-    /* 3. state buffers */
     let simW, simH, field, backCanvas, backCtx;
     let logoMask = null;
-    const mouse  = { x: 0.5, y: 0.5 };
-    const tilt   = { x: 0, y: 0 };
 
-    let textStart = Date.now() + TEXT_DELAY;
-    let hintStart = Date.now() + HINT_DELAY_MS;
-    let explode   = false;
-    let explodeT  = 0;
+    const mouse = { x: 0.5, y: 0.5 };
 
-    /* 4. rasterise SVG once */
-    const buildLogoMask = () =>
-      new Promise((res) => {
-        const img = new Image();
-        img.src = logoSrc;
-        img.onload = () => {
-          const tmp = document.createElement("canvas");
-          tmp.width = LOGO_BASE;
-          tmp.height = LOGO_BASE;
-          tmp.getContext("2d").drawImage(img, 0, 0, LOGO_BASE, LOGO_BASE);
-          const d = tmp
-            .getContext("2d")
-            .getImageData(0, 0, LOGO_BASE, LOGO_BASE).data;
-          logoMask = new Float32Array(LOGO_BASE * LOGO_BASE);
-          for (let i = 0; i < logoMask.length; i++)
-            logoMask[i] = d[i * 4 + 3] > 128 ? 1 : 0;
-          res();
-        };
-      });
+    /* text fade‑in control */
+    let textStartTime = 0;
+    setTimeout(() => { textStartTime = Date.now(); }, TEXT_DELAY);
 
-    /* 5. responsive footer font */
-    let fontSize = 14, rowH = 16;
+    /* hint delay */
+    const hintStart = Date.now() + HINT_DELAY;
+
+    /* explode state */
+    let explode = false, explodeTime = 0;
+    const onClick = () => { explode = true; explodeTime = Date.now(); };
+    window.addEventListener("click", onClick);
+
+    /* SVG → mask */
+    const buildLogoMask = () => new Promise((res) => {
+      const img = new Image();
+      img.src = logoSrc;
+      img.onload = () => {
+        const tmp = document.createElement("canvas");
+        tmp.width = LOGO_BASE; tmp.height = LOGO_BASE;
+        tmp.getContext("2d").drawImage(img, 0, 0, LOGO_BASE, LOGO_BASE);
+        const data = tmp.getContext("2d").getImageData(0, 0, LOGO_BASE, LOGO_BASE).data;
+        logoMask = new Uint8Array(LOGO_BASE * LOGO_BASE);
+        for (let i = 0; i < logoMask.length; i++) logoMask[i] = data[i * 4 + 3] > 128 ? 1 : 0;
+        res();
+      };
+    });
+
+    /* === 3. RESPONSIVE FONT ========================== */
+    let fontSize = 16, rowH = 18;
     const fitFont = () => {
       const longest = TEXT_LINES.reduce((m, l) => Math.max(m, l.length), 0);
       const byW = Math.floor((window.innerWidth - 40) / (longest * 0.95));
       const byH = Math.floor((window.innerHeight - 40) / (TEXT_LINES.length * 1.1));
-      fontSize = Math.max(10, Math.min(MAX_FONT, Math.min(byW, byH)));
+      fontSize = Math.max(10, Math.min(MAX_FONT_SIZE, Math.min(byW, byH)));
       rowH = Math.floor(fontSize * 1.1);
     };
 
-    /* 6. init / resize */
+    /* === 4. INIT BUFFERS ============================= */
     const init = () => {
       fitFont();
-      canvas.width  = window.innerWidth;
+      canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      simW = Math.floor(canvas.width  * SCALE);
+      simW = Math.floor(canvas.width * SCALE);
       simH = Math.floor(canvas.height * SCALE);
       field = new Float32Array(simW * simH);
       backCanvas = Object.assign(document.createElement("canvas"), { width: simW, height: simH });
       backCtx = backCanvas.getContext("2d");
     };
 
-    /* 7. trails */
+    /* === 5. TRAIL PARAMETERS ========================= */
     const trails = Array.from({ length: TRAIL_COUNT }, (_, i) => ({
       f: 0.002 + i * 0.0004,
-      p: Math.random() * Math.PI * 2,
-      mx: 0.35 + 0.15 * Math.sin(i * 1.3),
-      my: 0.35 + 0.15 * Math.cos(i * 0.9),
+      p: i * Math.PI * 0.5,
+      mx: 0.25 + 0.12 * Math.sin(i * 1.3),
+      my: 0.25 + 0.12 * Math.cos(i * 0.9),
     }));
 
-    /* 8. simulation step */
+    /* === 6. SIMULATION STEP ========================== */
     const step = () => {
       const nxt = new Float32Array(simW * simH);
+      // diffusion kernel
       for (let y = 1; y < simH - 1; y++)
         for (let x = 1; x < simW - 1; x++) {
           const i = y * simW + x;
           nxt[i] = ((field[i - 1] + field[i + 1] + field[i - simW] + field[i + simW]) / 4 - nxt[i]) * 0.96;
         }
 
-      const t  = Date.now();
-      const mx = (mouse.x + tilt.x - 0.5) * simW;
-      const my = (mouse.y + tilt.y - 0.5) * simH;
+      const t = Date.now();
+      const mx = (mouse.x - 0.5) * simW;
+      const my = (mouse.y - 0.5) * simH;
 
       for (const tr of trails) {
         const cx = Math.sin(t * tr.f + tr.p) * simW * 0.3 + simW / 2 + mx * tr.mx;
@@ -132,28 +136,28 @@ export default function GloupSoupFluidMultiTrail() {
           for (let ox = -r; ox <= r; ox++)
             if (ox * ox + oy * oy <= r * r) {
               const idx = ((cy | 0) + oy) * simW + ((cx | 0) + ox);
-              if (idx >= 0 && idx < nxt.length) nxt[idx] += TRAIL_ENERGY;
+              if (idx >= 0 && idx < nxt.length) {
+                // lower core energy for softer heads
+                const falloff = 0.7 + 0.5 * Math.hypot(ox, oy) / r; // 0.7‑1.2
+                nxt[idx] += falloff;
+              }
             }
       }
 
-      // static logo brighten
+      // logo mask brighten
       if (logoMask) {
-        const logoW = Math.floor(simW * 1);
-        const logoH = Math.floor(simH * 0.7);
+        const logoW = Math.floor(simW * 1), logoH = Math.floor(simH * 0.7);
         for (let y = 0; y < logoH; y++)
           for (let x = 0; x < logoW; x++) {
-            const u = Math.floor((x / logoW) * LOGO_BASE);
-            const v = Math.floor((y / logoH) * LOGO_BASE);
-            if (logoMask[v * LOGO_BASE + u]) {
-              const fi = y * simW + x;
-              nxt[fi] = nxt[fi] * 0.85 + 0.15;
-            }
+            const u = ((x / logoW) * LOGO_BASE) | 0;
+            const v = ((y / logoH) * LOGO_BASE) | 0;
+            if (logoMask[v * LOGO_BASE + u]) nxt[y * simW + x] = nxt[y * simW + x] * 0.9 + 0.1;
           }
       }
 
       // explode scatter
       if (explode) {
-        const prog = (Date.now() - explodeT) / DISPERSE_MS;
+        const prog = (Date.now() - explodeTime) / DISPERSE_MS;
         if (prog >= 1) { window.location.href = "https://theglitch.co"; return; }
         const maxShift = simW * 0.35 * prog;
         for (let y = 0; y < simH; y++)
@@ -170,85 +174,67 @@ export default function GloupSoupFluidMultiTrail() {
       field = nxt;
     };
 
-    /* DRAW */
+    /* === 7. DRAW ===================================== */
     const bayer = [15,135,45,165,195,75,225,105,60,180,30,150,240,120,210,90];
     const draw = () => {
-      /* --- simulation texture --- */
+      // 7.1 dither & upscale
       const img = backCtx.createImageData(simW, simH);
-      const d = img.data;
       for (let i = 0; i < field.length; i++) {
-        const v = Math.min(255, field[i] * 180);
-        const x = i % simW,
-          y = (i / simW) | 0;
-        const col = v > b4[(y & 3) * 4 + (x & 3)] ? 255 : 0;
+        const g = Math.min(255, field[i] * 180);
+        const x = i % simW, y = (i / simW) | 0;
+        const c = g > bayer[(y & 3) * 4 + (x & 3)] ? 255 : 0;
         const j = i * 4;
-        d[j] = d[j + 1] = d[j + 2] = col;
-        d[j + 3] = 255;
+        img.data[j] = img.data[j + 1] = img.data[j + 2] = c;
+        img.data[j + 3] = 255;
       }
       backCtx.putImageData(img, 0, 0);
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(backCanvas, 0, 0, canvas.width, canvas.height);
 
-      // HINT (desktop only)
-      if (window.innerWidth > MOBILE_BREAK && Date.now() >= hintStart) {
-        const cx = mouse.x * canvas.width;
-        const cy = mouse.y * canvas.height;
+      // 7.2 circular hint (desktop only)
+      if (Date.now() >= hintStart && window.innerWidth > HINT_HIDE_MAX_W) {
+        const cx = mouse.x * canvas.width, cy = mouse.y * canvas.height;
         ctx.font = "14px 'Press Start 2P', monospace";
         ctx.fillStyle = "white";
-        const R = 35, rot = Date.now() * 0.002;
-        for (let i = 0; i < HINT.length; i++) {
-          const ang = (i / HINT.length) * Math.PI * 2 + rot;
+        const R = 35, rot = Date.now() * 0.002, n = HINT.length;
+        for (let i = 0; i < n; i++) {
+          const ang = (i / n) * Math.PI * 2 + rot;
           const wob = Math.sin(rot * 3 + i) * 2;
           ctx.fillText(HINT[i], cx + (R + wob) * Math.cos(ang) - 4, cy + (R + wob) * Math.sin(ang) - 4);
         }
       }
 
-      // FOOTER (fade + slight jitter distortion)
-      if(Date.now()>=textStart){
-        const fade=Math.min(1,(Date.now()-textStart)/TEXT_FADE_MS);
-        ctx.font=`${fontSize}px 'Press Start 2P', monospace`;
-        ctx.fillStyle="white";
-        const startY=canvas.height-rowH*TEXT_LINES.length-20;
-        TEXT_LINES.forEach((l,i)=>{
-          // per-line horizontal jitter that eases out as fade completes
-          const jitter=(1-fade)*3*Math.sin(i*1.3+Date.now()*0.01);
-          ctx.globalAlpha=fade;
-          ctx.fillText(l,20+jitter,startY+i*rowH);
+      // 7.3 NFO text fade‑in with slight horizontal distortion
+      if (textStartTime) {
+        const a = Math.min(1, (Date.now() - textStartTime) / TEXT_FADE_MS);
+        ctx.globalAlpha = a;
+        ctx.font = `${fontSize}px 'Press Start 2P', monospace`;
+        ctx.fillStyle = "white";
+        const startY = canvas.height - rowH * TEXT_LINES.length - 20;
+        TEXT_LINES.forEach((l, i) => {
+          const dx = Math.sin((Date.now() + i * 100) * 0.004) * 5 * (1 - a); // distortion dies as it fades in
+          ctx.fillText(l, 20 + dx, startY + i * rowH);
         });
-        ctx.globalAlpha=1;
+        ctx.globalAlpha = 1;
       }
     };
 
-    /* LOOP */
+    /* === 8. LOOP & LISTENERS ========================= */
     const loop = () => { step(); draw(); requestAnimationFrame(loop); };
 
-    /* LISTENERS */
-    window.addEventListener("resize", init);
-
+    const onResize = () => init();
+    window.addEventListener("resize", onResize);
     window.addEventListener("mousemove", (e) => {
       mouse.x = e.clientX / window.innerWidth;
       mouse.y = e.clientY / window.innerHeight;
     });
 
-    window.addEventListener("touchmove", (e) => {
-      const t = e.touches[0];
-      mouse.x = t.clientX / window.innerWidth;
-      mouse.y = t.clientY / window.innerHeight;
-    }, { passive: true });
-
-    window.addEventListener("click", () => { explode = true; explodeT = Date.now(); });
-
-    const onOrient = (e) => { tilt.x = (e.gamma || 0) / 180; tilt.y = (e.beta || 0) / 180; };
-    if (window.DeviceOrientationEvent) window.addEventListener("deviceorientation", onOrient);
-
-    /* run */
     buildLogoMask().then(() => { init(); loop(); });
 
-    /* cleanup */
     return () => {
       document.head.removeChild(link);
-      window.removeEventListener("resize", init);
-      window.removeEventListener("deviceorientation", onOrient);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("click", onClick);
     };
   }, []);
 
