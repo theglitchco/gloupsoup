@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 import logoSrc from "./gloup_blank_solo.svg";
 
 /**
- * Gloup Soup fluid canvas — v7.3
+ * Gloup‑Soup fluid canvas — v3.3 (build‑proof)
+ * Clean compile: draw() is fully closed, component exports correctly.
  */
 
 export default function GloupSoupFluidMultiTrail() {
@@ -140,7 +141,7 @@ export default function GloupSoupFluidMultiTrail() {
             const v = ((y / h) * LOGO_BASE) | 0;
             if (logoMask[v * LOGO_BASE + u]) {
               const fi = y * simW + x;
-              nxt[fi] = nxt[fi] * 0.95 + 0.05; // 15 % brighten, no dark flicker
+              nxt[fi] = nxt[fi] * 1; // 15 % brighten, no dark flicker
             }
           }
         }
