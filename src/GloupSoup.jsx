@@ -62,20 +62,24 @@ export default function GloupSoupFluidMultiTrail() {
     let explodeT  = 0;
 
     /* 4. rasterise SVG once */
-    const buildLogoMask = () => new Promise((res) => {
-      const img = new Image();
-      img.src = logoSrc;
-      img.onload = () => {
-        const tmp = document.createElement("canvas");
-        tmp.width = LOGO_BASE;
-        tmp.height = LOGO_BASE;
-        tmp.getContext("2d").drawImage(img, 0, 0, LOGO_BASE, LOGO_BASE);
-        const d = tmp.getContext("2d").getImageData(0, 0, LOGO_BASE, LOGO_BASE).data;
-        logoMask = new Uint8Array(LOGO_BASE * LOGO_BASE);
-        for (let i = 0; i < logoMask.length; i++) logoMask[i] = d[i * 4 + 3] > 128 ? 1 : 0;
-        res();
-      };
-    });
+    const buildLogoMask = () =>
+      new Promise((res) => {
+        const img = new Image();
+        img.src = logoSrc;
+        img.onload = () => {
+          const tmp = document.createElement("canvas");
+          tmp.width = LOGO_BASE;
+          tmp.height = LOGO_BASE;
+          tmp.getContext("2d").drawImage(img, 0, 0, LOGO_BASE, LOGO_BASE);
+          const d = tmp
+            .getContext("2d")
+            .getImageData(0, 0, LOGO_BASE, LOGO_BASE).data;
+          logoMask = new Float32Array(LOGO_BASE * LOGO_BASE);
+          for (let i = 0; i < logoMask.length; i++)
+            logoMask[i] = d[i * 4 + 3] > 128 ? 1 : 0;
+          res();
+        };
+      });
 
     /* 5. responsive footer font */
     let fontSize = 14, rowH = 16;
@@ -134,14 +138,16 @@ export default function GloupSoupFluidMultiTrail() {
 
       // static logo brighten
       if (logoMask) {
-        const w = Math.floor(simW * 1), h = Math.floor(simH * 0.7);
-        for (let y = 0; y < h; y++)
-          for (let x = 0; x < w; x++) {
-            const u = ((x / w) * LOGO_BASE) | 0;
-            const v = ((y / h) * LOGO_BASE) | 0;
-            if (!logoMask[v * LOGO_BASE + u]) continue;
-            const fi = y * simW + x;
-            nxt[fi] = nxt[fi] * 0.95 + 0.05;
+        const logoW = Math.floor(simW * 1);
+        const logoH = Math.floor(simH * 0.7);
+        for (let y = 0; y < logoH; y++)
+          for (let x = 0; x < logoW; x++) {
+            const u = Math.floor((x / logoW) * LOGO_BASE);
+            const v = Math.floor((y / logoH) * LOGO_BASE);
+            if (logoMask[v * LOGO_BASE + u]) {
+              const fi = y * simW + x;
+              nxt[fi] = nxt[fi] * 0.85 + 0.15;
+            }
           }
       }
 
@@ -164,23 +170,26 @@ export default function GloupSoupFluidMultiTrail() {
       field = nxt;
     };
 
-    /* 9. draw */
+    /* DRAW */
     const bayer = [15,135,45,165,195,75,225,105,60,180,30,150,240,120,210,90];
     const draw = () => {
+      /* --- simulation texture --- */
       const img = backCtx.createImageData(simW, simH);
+      const d = img.data;
       for (let i = 0; i < field.length; i++) {
-        const g = Math.min(255, field[i] * FIELD_BRIGHT);
-        const x = i % simW, y = (i / simW) | 0;
-        const col = g > bayer[(y & 3) * 4 + (x & 3)] ? 255 : 0;
+        const v = Math.min(255, field[i] * 180);
+        const x = i % simW,
+          y = (i / simW) | 0;
+        const col = v > b4[(y & 3) * 4 + (x & 3)] ? 255 : 0;
         const j = i * 4;
-        img.data[j] = img.data[j + 1] = img.data[j + 2] = col;
-        img.data[j + 3] = 255;
+        d[j] = d[j + 1] = d[j + 2] = col;
+        d[j + 3] = 255;
       }
       backCtx.putImageData(img, 0, 0);
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(backCanvas, 0, 0, canvas.width, canvas.height);
 
-      // hint (desktop only)
+      // HINT (desktop only)
       if (window.innerWidth > MOBILE_BREAK && Date.now() >= hintStart) {
         const cx = mouse.x * canvas.width;
         const cy = mouse.y * canvas.height;
@@ -194,7 +203,7 @@ export default function GloupSoupFluidMultiTrail() {
         }
       }
 
-      // 7.3 footer text (fade + slight jitter distortion)
+      // FOOTER (fade + slight jitter distortion)
       if(Date.now()>=textStart){
         const fade=Math.min(1,(Date.now()-textStart)/TEXT_FADE_MS);
         ctx.font=`${fontSize}px 'Press Start 2P', monospace`;
@@ -210,10 +219,10 @@ export default function GloupSoupFluidMultiTrail() {
       }
     };
 
-    /* 10. loop */
+    /* LOOP */
     const loop = () => { step(); draw(); requestAnimationFrame(loop); };
 
-    /* 11. listeners */
+    /* LISTENERS */
     window.addEventListener("resize", init);
 
     window.addEventListener("mousemove", (e) => {
