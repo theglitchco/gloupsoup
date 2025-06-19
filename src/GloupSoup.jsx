@@ -134,14 +134,14 @@ export default function GloupSoupFluidMultiTrail() {
 
       // static logo brighten
       if (logoMask) {
-        const w = Math.floor(simW * 0.15), h = Math.floor(simH * 0.15);
+        const w = Math.floor(simW * 1), h = Math.floor(simH * 0.7);
         for (let y = 0; y < h; y++)
           for (let x = 0; x < w; x++) {
             const u = ((x / w) * LOGO_BASE) | 0;
             const v = ((y / h) * LOGO_BASE) | 0;
             if (!logoMask[v * LOGO_BASE + u]) continue;
             const fi = y * simW + x;
-            nxt[fi] = nxt[fi] * 0.85 + 0.15;
+            nxt[fi] = nxt[fi] * 1;
           }
       }
 
