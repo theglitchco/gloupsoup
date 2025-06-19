@@ -138,8 +138,8 @@ export default function GloupSoupFluidMultiTrail() {
         const grow  = 1 + HEART_AMPL * beat;       // scale factor 1.00-1.05
         const glow  = 0.02 * beat;                 // ≤ 2 % extra brightness
 
-        const w = Math.floor(simW * 0.15),
-              h = Math.floor(simH * 0.15),
+        const w = Math.floor(simW * 1),
+              h = Math.floor(simH * 0.7),
               cx = w / 2,
               cy = h / 2,
               maxR = Math.hypot(cx, cy);
@@ -236,29 +236,61 @@ export default function GloupSoupFluidMultiTrail() {
 
     const loop = () => { step(); draw(); requestAnimationFrame(loop); };
 
-    /* LISTENERS */
+    /* 8. MAIN LOOP + LISTENERS ---------------------------------- */
+    const loop = () => { step(); draw(); requestAnimationFrame(loop); };
+
+    /* — window resize — */
     const onResize = () => init();
     window.addEventListener("resize", onResize);
-    window.addEventListener("mousemove", (e) => {
+
+    /* — mouse pointer — */
+    window.addEventListener("mousemove", e => {
       mouse.x = e.clientX / window.innerWidth;
       mouse.y = e.clientY / window.innerHeight;
     });
+
+    /* — click-to-explode — */
     window.addEventListener("click", () => { explode = true; explodeT = Date.now(); });
 
+    /* -------- G Y R O --------
+     * iOS (>= 13) requires a user-gesture + permission prompt.
+     * Android fires immediately. We enable on first touch/click.          */
+    let gyroEnabled = false;
     const onOrient = (e) => {
-      tilt.x = (e.gamma || 0) / 180; // -0.5..0.5
-      tilt.y = (e.beta || 0) / 180;
+      /* gamma: left/right -90‒90,   beta: front/back -180‒180
+         map to ±0.5, then trails amplify it internally               */
+      tilt.x = (e.gamma ?? 0) / 90 * 0.5;   // stronger X
+      tilt.y = (e.beta  ?? 0) / 180;        // softer Y
     };
-    if (window.DeviceOrientationEvent) window.addEventListener("deviceorientation", onOrient);
+    const enableGyro = () => {
+      if (gyroEnabled || !window.DeviceOrientationEvent) return;
+      /* iOS secure-origin permission flow */
+      if (typeof DeviceOrientationEvent.requestPermission === "function") {
+        DeviceOrientationEvent.requestPermission()
+          .then((resp) => { if (resp === "granted") {
+            window.addEventListener("deviceorientation", onOrient, true);
+            gyroEnabled = true;
+          }});
+      } else {
+        /* Android / desktop with sensors */
+        window.addEventListener("deviceorientation", onOrient, true);
+        gyroEnabled = true;
+      }
+    };
+    /* first user interaction (touchstart covers mobiles that never send click) */
+    window.addEventListener("touchstart", enableGyro, { once: true });
+    window.addEventListener("click",      enableGyro, { once: true });
 
+    /* -------- run -------- */
     buildLogoMask().then(() => { init(); loop(); });
 
+    /* cleanup */
     return () => {
       document.head.removeChild(link);
       window.removeEventListener("resize", onResize);
-      window.removeEventListener("deviceorientation", onOrient);
+      if (gyroEnabled) window.removeEventListener("deviceorientation", onOrient, true);
     };
-  }, []);
+
 
   return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full" />;
 }
