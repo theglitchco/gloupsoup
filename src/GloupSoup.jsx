@@ -12,7 +12,7 @@ export default function GloupSoupFluidMultiTrail() {
    * CONFIGURATION
    * -------------------------------------------------- */
   const SCALE = 0.5;            // simulation resolution factor
-  const TRAIL_COUNT = 4;        // number of comet trails
+  const TRAIL_COUNT = 5;        // number of comet trails
   const TRAIL_RADIUS = 6;       // low‑res radius to inject energy
   const TRAIL_DECAY = 0.96;     // ↑ faster fade (shorter tails)
   const HEAD_INTENSITY = 1.2;   // brightness of comet heads
@@ -26,7 +26,7 @@ export default function GloupSoupFluidMultiTrail() {
   const TEXT_LINES = [
     "───────────────────────────────────────────────────────",
     "GLOUP SOUP INCUBATOR",
-    "VOLUME 4 STARTS 22nd JUNE 2025",
+    "VOLUME 5 STARTS 3rd AUGUST 2025",
     "COME AND MAKE FILMS",
     "ONE WORD THEME · 2 WEEKS DEADLINE",
     "IG @GLOUP.SOUP",
