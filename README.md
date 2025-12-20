@@ -48,15 +48,15 @@
 
 ──────────────────────────────────────────────────────────────────────────────
 :GLOUP SOUP INCUBATOR:
-VOLUME 7 — STARTED 25TH OCTOBER 2025
+VOLUME 8 — STARTED 6TH DECEMBER 2025
 
 COME AND MAKE FILMS
-ONE‑WORD THEME · 3 WEEKS DEADLINE
+ONE‑WORD THEME · 4 WEEKS DEADLINE
 ──────────────────────────────────────────────────────────────────────────────
 : TITLE        : DÉJÀ VU
-: START DATE   : 27.10.2025
-: DURATION     : 21 days
-: SCREENING    : 16.11.2025
+: START DATE   : 06.12.2025
+: DURATION     : 25 days
+: SCREENING    : 04.01.2026
 : LOCATION     : HACKNEY WICK
 : CONTACT      : contact@theglitch.co
 : IG           : @gloup.soup (or DM @szwyrz @j.e.starrs)
@@ -109,6 +109,7 @@ ONE‑WORD THEME · 3 WEEKS DEADLINE
   ⇛ VOL5  “UNFINISHED BUSINESS”  (AUG 2025)
   ⇛ VOL6  “EXQUISITE CORPSE”  (SEP 2025)
   ⇛ VOL7  “DÉJÀ VU”  (OCT-NOV 2025)
+  ⇛ VOL8  “TIME”  (DEC 2025 - JAN 2026)
 
  ═─[ T H X ]──────────────────────────────────────────────────────────────────
   Thank you to all of the people who make this possible.

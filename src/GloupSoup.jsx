@@ -25,10 +25,10 @@ export default function GloupSoupFluidMultiTrail() {
 
   const TEXT_LINES = [
     "───────────────────────────────────────────────────────",
-    "GLOUP SOUP INCUBATOR VOL 7",
-    "DÉJÀ VU STARTS 25TH OCTOBER 2025",
+    "GLOUP SOUP INCUBATOR VOL 8",
+    "VISIT FROM FATHER TIME STARTED 6DEC25",
     "COME AND MAKE FILMS",
-    "ONE WORD THEME · 3 WEEKS DEADLINE",
+    "ONE WORD THEME · 4 WEEKS DEADLINE",
     "IG @GLOUP.SOUP",
     "CONTACT@THEGLITCH.CO",
     "THEGLITCH.CO · HACKNEY WICK.",
