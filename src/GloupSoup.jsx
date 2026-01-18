@@ -12,10 +12,10 @@ export default function GloupSoupFluidMultiTrail() {
    * CONFIGURATION
    * -------------------------------------------------- */
   const SCALE = 0.5;            // simulation resolution factor
-  const TRAIL_COUNT = 7;        // number of comet trails
-  const TRAIL_RADIUS = 6;       // low‑res radius to inject energy
-  const TRAIL_DECAY = 0.95;     // ↑ faster fade (shorter tails)
-  const HEAD_INTENSITY = 0.8;   // brightness of comet heads
+  const TRAIL_COUNT = 9;        // number of comet trails
+  const TRAIL_RADIUS = 7;       // low‑res radius to inject energy
+  const TRAIL_DECAY = 0.92;     // ↑ faster fade (shorter tails)
+  const HEAD_INTENSITY = 0.6;   // brightness of comet heads
   const LOGO_BASE = 150;        // logo sampling grid
   const TEXT_DELAY = 500;       // ms before footer starts
   const HINT_DELAY = 20000;     // ms before hint appears (desktop only)
@@ -25,10 +25,10 @@ export default function GloupSoupFluidMultiTrail() {
 
   const TEXT_LINES = [
     "───────────────────────────────────────────────────────",
-    "GLOUP SOUP INCUBATOR VOL 8",
-    "VISIT FROM FATHER TIME STARTED 6DEC25",
+    "GLOUP SOUP INCUBATOR VOL 9",
+    "ONE SHOT STARTED 17TH JAN '26",
     "COME AND MAKE FILMS",
-    "ONE WORD THEME · 4 WEEKS DEADLINE",
+    "ONE WORD THEME · 3 WEEKS DEADLINE",
     "IG @GLOUP.SOUP",
     "CONTACT@THEGLITCH.CO",
     "THEGLITCH.CO · HACKNEY WICK.",
