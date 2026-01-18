@@ -12,15 +12,15 @@ export default function GloupSoupFluidMultiTrail() {
    * CONFIGURATION
    * -------------------------------------------------- */
   const SCALE = 0.5;            // simulation resolution factor
-  const TRAIL_COUNT = 8;        // number of blobs
-  const TRAIL_RADIUS = 10;      // low‑res radius to inject energy
-  const TRAIL_DECAY = 0.985;    // slow fade for fluid blobs
-  const HEAD_INTENSITY = 0.5;   // brightness of blobs (matches logo)
-  const LOGO_GLOW = 0.5;        // baseline brightness inside logo
-  const LIFE_MIN = 4800;        // blob lifetime bounds (ms)
-  const LIFE_MAX = 8200;
-  const FLOW_STRENGTH = 0.18;   // strength of curl flow
-  const WOBBLE_STRENGTH = 0.04; // tiny wobble for organic drift
+  const TRAIL_COUNT = 9;        // number of comet trails
+  const TRAIL_RADIUS = 8;       // low‑res radius to inject energy
+  const TRAIL_DECAY = 0.97;     // slower fade for gooey blobs
+  const HEAD_INTENSITY = 0.6;   // brightness of comet heads (subtle)
+  const LOGO_GLOW = 0.18;       // baseline brightness inside logo
+  const LIFE_MIN = 1500;        // trail lifetime bounds (ms)
+  const LIFE_MAX = 2600;
+  const FLOW_STRENGTH = 0.5;    // flow influence on each blob
+  const WOBBLE_STRENGTH = 0.12; // organic wobble for lava‑lamp feel
   const LOGO_BASE = 150;        // logo sampling grid
   const TEXT_DELAY = 500;       // ms before footer starts
   const HINT_DELAY = 20000;     // ms before hint appears (desktop only)
@@ -175,8 +175,8 @@ export default function GloupSoupFluidMultiTrail() {
       return Object.assign(existing, {
         x: p.x * simW,
         y: p.y * simH * 0.7,
-        vx: Math.cos(angle) * 0.02,
-        vy: Math.sin(angle) * 0.02,
+        vx: Math.cos(angle) * 0.08,
+        vy: Math.sin(angle) * 0.08,
         wobble: Math.random() * Math.PI * 2,
         life: LIFE_MIN + Math.random() * (LIFE_MAX - LIFE_MIN),
       });
@@ -187,16 +187,18 @@ export default function GloupSoupFluidMultiTrail() {
     };
 
     const flowVector = (x, y, t) => {
-      const nx = x / simW - 0.5;
-      const ny = y / simH - 0.35;
-      const scale = 0.9;
-      const curlX =
-        Math.sin(ny * 3 + t * 0.0004) * Math.cos(nx * 2.3 - t * 0.0003) +
-        Math.sin((nx + ny) * 1.7 - t * 0.0006) * 0.6;
-      const curlY =
-        -Math.cos(nx * 3.1 + t * 0.0005) * Math.sin(ny * 2.6 + t * 0.0004) +
-        Math.cos((nx - ny) * 2.1 + t * 0.0007) * 0.6;
-      return { x: curlX * scale, y: curlY * scale };
+      const cx = simW / 2;
+      const cy = simH * 0.35;
+      const dx = x - cx;
+      const dy = y - cy;
+      const dist = Math.max(24, Math.hypot(dx, dy));
+      const radial = Math.max(0, 0.6 - dist / Math.max(simW, simH)) * 2.4;
+      const swirl = Math.sin((dx + dy) * 0.01 + t * 0.0007) + Math.cos((dx - dy) * 0.008 - t * 0.0005);
+      const baseAngle = Math.atan2(dy, dx + 1e-4) + swirl * 0.25;
+      return {
+        x: Math.cos(baseAngle) * radial + Math.sin(t * 0.001 + y * 0.02) * 0.25,
+        y: Math.sin(baseAngle) * radial + Math.cos(t * 0.0012 + x * 0.018) * 0.25,
+      };
     };
 
     const stampTrail = (px, py, buffer) => {
@@ -238,38 +240,28 @@ export default function GloupSoupFluidMultiTrail() {
       // inject comet heads with lava‑lamp flow
       for (const tr of trails) {
         tr.life -= dt;
-        tr.wobble += dt * 0.0008;
+        tr.wobble += dt * 0.0012;
 
         const flow = flowVector(tr.x, tr.y, now);
         tr.vx += (flow.x * FLOW_STRENGTH + Math.sin(tr.wobble) * WOBBLE_STRENGTH) * dtScale;
         tr.vy += (flow.y * FLOW_STRENGTH + Math.cos(tr.wobble) * WOBBLE_STRENGTH) * dtScale;
 
-        // soft pull to center band to keep blobs in view
-        const cx = simW / 2;
-        const cy = simH * 0.38;
-        tr.vx += (cx - tr.x) * 0.000002 * dt;
-        tr.vy += (cy - tr.y) * 0.000002 * dt;
-
-        // minimal cursor influence for subtle responsiveness
-        tr.vx += (mouse.x * simW - tr.x) * 0.0000006 * dt;
-        tr.vy += (mouse.y * simH * 0.6 - tr.y) * 0.0000006 * dt;
-
-        // light damping
-        tr.vx *= 0.994;
-        tr.vy *= 0.994;
+        // slight pull toward cursor for responsiveness
+        tr.vx += (mouse.x * simW - tr.x) * 0.000002 * dt;
+        tr.vy += (mouse.y * simH * 0.7 - tr.y) * 0.000002 * dt;
 
         tr.x += tr.vx;
         tr.y += tr.vy;
 
-        const margin = TRAIL_RADIUS * 3;
-        if (tr.life <= 0 || tr.x < -margin || tr.x > simW + margin || tr.y < -margin || tr.y > simH + margin) {
+        const margin = TRAIL_RADIUS * 2;
+        if (tr.life <= 0 || tr.x < -margin || tr.x > simW + margin || tr.y < -margin || tr.y > simH * 0.9 + margin) {
           spawnTrail(tr);
         }
 
         stampTrail(tr.x, tr.y, nxt);
       }
 
-      // logo mask (same brightness as blobs; gentle pulse)
+      // logo mask (brighter and breathing)
       if (logoMask) {
         const logoW = simW;
         const logoH = Math.floor(simH * 0.7);
@@ -280,8 +272,7 @@ export default function GloupSoupFluidMultiTrail() {
             if (logoMask[v * LOGO_BASE + u]) {
               const fi = y * simW + x;
               const pulse = Math.sin(now * 0.001 + (u + v) * 0.05) * 0.03;
-              const base = LOGO_GLOW + pulse * 0.25;
-              nxt[fi] = Math.max(nxt[fi] * 0.9, base);
+              nxt[fi] = nxt[fi] * 0.82 + LOGO_GLOW + pulse * 0.5;
             }
           }
       }
@@ -334,6 +325,20 @@ export default function GloupSoupFluidMultiTrail() {
       // upscale to full canvas
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(backCanvas, 0, 0, canvas.width, canvas.height);
+
+      // subtle halo from logo origin so trails feel born there
+      if (logoMask) {
+        const cx = canvas.width / 2;
+        const cy = canvas.height * 0.35;
+        const g = ctx.createRadialGradient(cx, cy, canvas.width * 0.02, cx, cy, canvas.width * 0.42);
+        g.addColorStop(0, "rgba(255,255,255,0.12)");
+        g.addColorStop(0.38, "rgba(255,255,255,0.08)");
+        g.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.globalCompositeOperation = "screen";
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalCompositeOperation = "source-over";
+      }
 
       /* ---- orbiting hint (desktop) ---- */
       if (HINT && Date.now() >= hintStart) {
