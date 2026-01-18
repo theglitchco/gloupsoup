@@ -13,9 +13,14 @@ export default function GloupSoupFluidMultiTrail() {
    * -------------------------------------------------- */
   const SCALE = 0.5;            // simulation resolution factor
   const TRAIL_COUNT = 9;        // number of comet trails
-  const TRAIL_RADIUS = 7;       // low‑res radius to inject energy
-  const TRAIL_DECAY = 0.92;     // ↑ faster fade (shorter tails)
-  const HEAD_INTENSITY = 0.6;   // brightness of comet heads
+  const TRAIL_RADIUS = 8;       // low‑res radius to inject energy
+  const TRAIL_DECAY = 0.965;    // slower fade for gooey blobs
+  const HEAD_INTENSITY = 0.75;  // brightness of comet heads
+  const FLOW_STRENGTH = 0.55;   // flow influence on each comet
+  const WOBBLE_STRENGTH = 0.14; // organic wobble for lava‑lamp feel
+  const LIFE_MIN = 1500;        // trail lifetime bounds (ms)
+  const LIFE_MAX = 2600;
+  const LOGO_GLOW = 0.22;       // baseline brightness inside logo
   const LOGO_BASE = 150;        // logo sampling grid
   const TEXT_DELAY = 500;       // ms before footer starts
   const HINT_DELAY = 20000;     // ms before hint appears (desktop only)
@@ -62,6 +67,9 @@ export default function GloupSoupFluidMultiTrail() {
      * 3. STATE VARS
      * ------------------------------------------------*/
     let logoMask = null;
+    let logoPoints = [];
+    let trails = [];
+    let lastStep = Date.now();
     const mouse = { x: 0.5, y: 0.5 };
 
     const footerStart = Date.now() + TEXT_DELAY;
@@ -109,7 +117,16 @@ export default function GloupSoupFluidMultiTrail() {
           tmp.getContext("2d").drawImage(img, 0, 0, LOGO_BASE, LOGO_BASE);
           const d = tmp.getContext("2d").getImageData(0, 0, LOGO_BASE, LOGO_BASE).data;
           logoMask = new Float32Array(LOGO_BASE * LOGO_BASE);
-          for (let i = 0; i < logoMask.length; i++) logoMask[i] = d[i * 4 + 3] > 128 ? 1 : 0;
+          logoPoints = [];
+          for (let i = 0; i < logoMask.length; i++) {
+            const on = d[i * 4 + 3] > 128 ? 1 : 0;
+            logoMask[i] = on;
+            if (on && Math.random() < 0.35) {
+              const u = (i % LOGO_BASE) / LOGO_BASE;
+              const v = Math.floor(i / LOGO_BASE) / LOGO_BASE;
+              logoPoints.push({ x: u, y: v });
+            }
+          }
           res();
         };
       });
@@ -141,17 +158,64 @@ export default function GloupSoupFluidMultiTrail() {
       field = new Float32Array(simW * simH);
       backCanvas = Object.assign(document.createElement("canvas"), { width: simW, height: simH });
       backCtx = backCanvas.getContext("2d");
+      seedTrails();
     };
 
     /* ------------------------------------------------
-     * 8. TRAIL PARAMS
+     * 8. TRAIL HELPERS (lava‑lamp flow)
      * ------------------------------------------------*/
-    const trails = Array.from({ length: TRAIL_COUNT }, (_, i) => ({
-      f: 0.002 + i * 0.0004,
-      p: i * Math.PI * 0.5,
-      mx: 0.25 + 0.12 * Math.sin(i * 1.3),
-      my: 0.25 + 0.12 * Math.cos(i * 0.9),
-    }));
+    const pickLogoPoint = () => {
+      if (!logoPoints.length) return { x: 0.5, y: 0.35 };
+      return logoPoints[(Math.random() * logoPoints.length) | 0];
+    };
+
+    const spawnTrail = (existing = {}) => {
+      const p = pickLogoPoint();
+      const angle = Math.random() * Math.PI * 2;
+      return Object.assign(existing, {
+        x: p.x * simW,
+        y: p.y * simH * 0.7,
+        vx: Math.cos(angle) * 0.08,
+        vy: Math.sin(angle) * 0.08,
+        wobble: Math.random() * Math.PI * 2,
+        life: LIFE_MIN + Math.random() * (LIFE_MAX - LIFE_MIN),
+      });
+    };
+
+    const seedTrails = () => {
+      trails = Array.from({ length: TRAIL_COUNT }, () => spawnTrail({}));
+    };
+
+    const flowVector = (x, y, t) => {
+      const cx = simW / 2;
+      const cy = simH * 0.35;
+      const dx = x - cx;
+      const dy = y - cy;
+      const dist = Math.max(24, Math.hypot(dx, dy));
+      const radial = Math.max(0, 0.6 - dist / Math.max(simW, simH)) * 2.4;
+      const swirl = Math.sin((dx + dy) * 0.01 + t * 0.0007) + Math.cos((dx - dy) * 0.008 - t * 0.0005);
+      const baseAngle = Math.atan2(dy, dx + 1e-4) + swirl * 0.25;
+      return {
+        x: Math.cos(baseAngle) * radial + Math.sin(t * 0.001 + y * 0.02) * 0.35,
+        y: Math.sin(baseAngle) * radial + Math.cos(t * 0.0012 + x * 0.018) * 0.35,
+      };
+    };
+
+    const stampTrail = (px, py, buffer) => {
+      const r = TRAIL_RADIUS;
+      for (let oy = -r; oy <= r; oy++) {
+        const y = (py + oy) | 0;
+        if (y < 1 || y >= simH - 1) continue;
+        for (let ox = -r; ox <= r; ox++) {
+          const x = (px + ox) | 0;
+          if (x < 1 || x >= simW - 1) continue;
+          const d2 = ox * ox + oy * oy;
+          if (d2 > r * r) continue;
+          const falloff = Math.exp(-d2 / (r * 1.6));
+          buffer[y * simW + x] += HEAD_INTENSITY * falloff;
+        }
+      }
+    };
 
     /* ------------------------------------------------
      * 9. SIMULATION STEP
@@ -163,26 +227,40 @@ export default function GloupSoupFluidMultiTrail() {
       for (let y = 1; y < simH - 1; y++)
         for (let x = 1; x < simW - 1; x++) {
           const i = y * simW + x;
-          nxt[i] = ((field[i - 1] + field[i + 1] + field[i - simW] + field[i + simW]) / 4 - nxt[i]) * TRAIL_DECAY;
+          const blend =
+            (field[i] * 2 + field[i - 1] + field[i + 1] + field[i - simW] + field[i + simW]) / 6;
+          nxt[i] = blend * TRAIL_DECAY;
         }
 
-      const t = Date.now();
-      const mx = (mouse.x - 0.5) * simW;
-      const my = (mouse.y - 0.5) * simH;
+      const now = Date.now();
+      const dt = Math.min(60, now - lastStep);
+      lastStep = now;
+      const dtScale = dt * 0.06;
 
-      // inject comet heads
+      // inject comet heads with lava‑lamp flow
       for (const tr of trails) {
-        const cx = Math.sin(t * tr.f + tr.p) * simW * 0.3 + simW / 2 + mx * tr.mx;
-        const cy = Math.cos(t * tr.f * 0.9 + tr.p) * simH * 0.3 + simH / 2 + my * tr.my;
-        for (let oy = -TRAIL_RADIUS; oy <= TRAIL_RADIUS; oy++)
-          for (let ox = -TRAIL_RADIUS; ox <= TRAIL_RADIUS; ox++)
-            if (ox * ox + oy * oy <= TRAIL_RADIUS * TRAIL_RADIUS) {
-              const idx = ((cy | 0) + oy) * simW + ((cx | 0) + ox);
-              if (idx >= 0 && idx < nxt.length) nxt[idx] += HEAD_INTENSITY;
-            }
+        tr.life -= dt;
+        tr.wobble += dt * 0.0018;
+        const flow = flowVector(tr.x, tr.y, now);
+        tr.vx += (flow.x * FLOW_STRENGTH + Math.sin(tr.wobble) * WOBBLE_STRENGTH) * dtScale;
+        tr.vy += (flow.y * FLOW_STRENGTH + Math.cos(tr.wobble) * WOBBLE_STRENGTH) * dtScale;
+
+        // slight pull toward cursor for responsiveness
+        tr.vx += (mouse.x * simW - tr.x) * 0.000002 * dt;
+        tr.vy += (mouse.y * simH * 0.7 - tr.y) * 0.000002 * dt;
+
+        tr.x += tr.vx;
+        tr.y += tr.vy;
+
+        const margin = TRAIL_RADIUS * 2;
+        if (tr.life <= 0 || tr.x < -margin || tr.x > simW + margin || tr.y < -margin || tr.y > simH * 0.9 + margin) {
+          spawnTrail(tr);
+        }
+
+        stampTrail(tr.x, tr.y, nxt);
       }
 
-      // logo mask (brightness logic unchanged)
+      // logo mask (brighter and breathing)
       if (logoMask) {
         const logoW = simW;
         const logoH = Math.floor(simH * 0.7);
@@ -192,7 +270,8 @@ export default function GloupSoupFluidMultiTrail() {
             const v = ((y / logoH) * LOGO_BASE) | 0;
             if (logoMask[v * LOGO_BASE + u]) {
               const fi = y * simW + x;
-              nxt[fi] = nxt[fi] * 0.85 + 0.15;
+              const pulse = Math.sin(now * 0.001 + (u + v) * 0.05) * 0.03;
+              nxt[fi] = nxt[fi] * 0.8 + LOGO_GLOW + pulse;
             }
           }
       }
@@ -205,6 +284,7 @@ export default function GloupSoupFluidMultiTrail() {
           return;
         }
         const maxShift = simW * 0.3 * prog;
+        const dispersed = new Float32Array(simW * simH);
         for (let y = 0; y < simH; y++)
           for (let x = 0; x < simW; x++) {
             const idx = y * simW + x;
@@ -212,8 +292,10 @@ export default function GloupSoupFluidMultiTrail() {
             const rad = Math.random() * maxShift;
             const sx = Math.min(simW - 1, Math.max(0, Math.round(x + Math.cos(ang) * rad)));
             const sy = Math.min(simH - 1, Math.max(0, Math.round(y + Math.sin(ang) * rad)));
-            nxt[idx] = field[sy * simW + sx] * (1 - prog);
+            dispersed[idx] = nxt[sy * simW + sx] * (1 - prog);
           }
+        field = dispersed;
+        return;
       }
 
       field = nxt;
@@ -242,6 +324,20 @@ export default function GloupSoupFluidMultiTrail() {
       // upscale to full canvas
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(backCanvas, 0, 0, canvas.width, canvas.height);
+
+      // subtle glow from logo origin so trails feel born there
+      if (logoMask) {
+        const cx = canvas.width / 2;
+        const cy = canvas.height * 0.35;
+        const g = ctx.createRadialGradient(cx, cy, canvas.width * 0.02, cx, cy, canvas.width * 0.45);
+        g.addColorStop(0, "rgba(255,255,255,0.22)");
+        g.addColorStop(0.45, "rgba(255,255,255,0.16)");
+        g.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.globalCompositeOperation = "screen";
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalCompositeOperation = "source-over";
+      }
 
       /* ---- orbiting hint (desktop) ---- */
       if (HINT && Date.now() >= hintStart) {
