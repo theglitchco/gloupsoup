@@ -35,8 +35,9 @@ That command pushes the built `dist/` folder to `gh-pages`.
 - Desktop hero spacing is intentionally tight, while tablet and phone top padding is larger to keep the stacked layout clear of the logo.
 - There is an additional wide-desktop tuning path in `src/styles.css` for larger monitors so the logo can scale up without the hero heading colliding with the current-volume panel.
 - The footer is centered and rendered as: `made in hackney wick, london, ooze from theglitch.co, {currentYear}`.
-- The logo has a click-triggered comet system with a maximum live pool of 10, replacement explosions, depth-based scaling, and a capped click-driven logo shrink.
+- The logo has a click-triggered comet system with a maximum live pool of 10, replacement explosions, a capped click-driven logo shrink, and a calmer orbital depth model intended to feel 3D without comets rushing the camera.
 - The logo layer is visually behind the content, but the page uses pointer-event passthrough in non-interactive space so the logo can still be clicked around the hero content.
+- The visible logo stage is intentionally modest in size, while the hidden internal canvas is much larger to give the comet system room before it hits drawable edges.
 
 ## Files to edit most often
 
@@ -47,9 +48,9 @@ That command pushes the built `dist/` folder to `gh-pages`.
 - `src/components/TrailerPlayer.jsx`
   Trailer behavior and poster handling.
 - `src/components/DitherLogo.jsx`
-  Logo animation, SVG normalization, dither rendering, comet interaction system, and click-driven shrink behavior.
+  Logo animation, SVG normalization, dither rendering, comet interaction/orbit system, and click-driven shrink behavior.
 - `src/styles.css`
-  Layout, responsive spacing, background/logo layering, footer styling, and visual tweaks.
+  Layout, responsive spacing, background/logo layering, pointer-event passthrough, footer styling, and visual tweaks.
 
 ## Public assets
 
@@ -73,4 +74,4 @@ The site is explicitly indexable via:
 - `gloup-soup-v1/` is handover/reference material only and should stay out of git.
 - Do not commit credentials, auth tokens, `.env` files, or private operational notes.
 - Keep the custom domain as `gloupsoup.com` unless explicitly instructed otherwise.
-- Latest pushed and deployed `main` commit at handoff should include the final comet/background layering adjustments from this session.
+- Latest pushed and deployed `main` commit at handoff should include the final comet/orbit tuning and background interaction layering from this session.

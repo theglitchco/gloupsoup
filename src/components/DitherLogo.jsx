@@ -8,9 +8,9 @@ const MATRIX = [
   [15, 7, 13, 5],
 ];
 
-const CANVAS_SIZE = 520;
+const CANVAS_SIZE = 1260;
 const BACKGROUND_VALUE = 5;
-const CANVAS_EXPANSION = 2.1;
+const CANVAS_EXPANSION = 3.75;
 
 function buildLogoSource(svgMarkup) {
   const parser = new DOMParser();
@@ -64,36 +64,52 @@ export default function DitherLogo() {
       const elapsed = Math.max(0, time - comet.bornAt);
       const launchProgress = Math.min(elapsed / comet.launchDuration, 1);
       const launchEase = 1 - (1 - launchProgress) ** 3;
-      const wobbleA = Math.sin(elapsed * comet.wobbleSpeedA + comet.phase) * comet.wobbleAmountA;
-      const wobbleB =
-        Math.cos(elapsed * comet.wobbleSpeedB + comet.phase * 0.7) * comet.wobbleAmountB;
-      const orbitAngle =
+      const meanAnomaly =
         comet.startAngle +
         comet.direction * elapsed * comet.angularVelocity +
-        wobbleA;
-      const radius =
-        orbitRadius * comet.orbitScale +
-        comet.radiusOffset +
-        Math.sin(elapsed * comet.radialSpeed + comet.phase) * comet.radialAmplitude +
-        wobbleB * 10;
-      const orbitX = Math.cos(orbitAngle) * radius;
-      const orbitY =
-        Math.sin(orbitAngle) * radius * comet.ellipseRatio +
+        Math.sin(elapsed * comet.phaseDriftSpeed + comet.phase) * 0.08;
+      const eccentricity = comet.eccentricity;
+      const eccentricAnomaly =
+        meanAnomaly +
+        eccentricity * Math.sin(meanAnomaly) * (1 + eccentricity * Math.cos(meanAnomaly));
+      const semiMajor = orbitRadius * comet.orbitScale + comet.radiusOffset;
+      const semiMinor = semiMajor * Math.sqrt(1 - eccentricity * eccentricity);
+      const orbitalX = semiMajor * (Math.cos(eccentricAnomaly) - eccentricity);
+      const orbitalY = semiMinor * Math.sin(eccentricAnomaly);
+      const argumentOfPeriapsis =
+        comet.periapsisAngle + elapsed * comet.precessionSpeed + Math.sin(elapsed * 0.00041 + comet.phase) * 0.06;
+      const rotatedX =
+        orbitalX * Math.cos(argumentOfPeriapsis) - orbitalY * Math.sin(argumentOfPeriapsis);
+      const rotatedY =
+        orbitalX * Math.sin(argumentOfPeriapsis) + orbitalY * Math.cos(argumentOfPeriapsis);
+      const worldX =
+        rotatedX +
+        Math.sin(elapsed * comet.driftSpeedA + comet.phase) * comet.driftAmountA;
+      const planarY =
+        rotatedY +
+        Math.cos(elapsed * comet.driftSpeedB + comet.phase * 0.7) * comet.driftAmountB;
+      const worldY =
+        planarY * Math.cos(comet.inclination) +
         Math.cos(elapsed * comet.verticalSpeed + comet.phase) * comet.verticalAmplitude;
       const z =
-        Math.sin(orbitAngle + comet.depthPhase) * comet.depthRadius +
-        Math.cos(elapsed * comet.depthSpeed + comet.phase) * comet.depthWobble;
-      const perspective = comet.focalLength / (comet.focalLength - z);
-      const x = orbitX * perspective * launchEase;
-      const y = orbitY * perspective * launchEase;
-      const depth = Math.min(1, Math.max(0, (z + comet.depthRadius) / (comet.depthRadius * 2)));
+        planarY * Math.sin(comet.inclination) +
+        Math.sin(elapsed * comet.depthSpeed + comet.phase) * comet.depthWobble;
+      const nearPlane = 26;
+      const safeDenominator = Math.max(nearPlane, comet.focalLength - z);
+      const perspective = comet.focalLength / safeDenominator;
+      const x = worldX * perspective * launchEase;
+      const y = worldY * perspective * launchEase;
+      const depthRange = semiMajor * Math.sin(comet.inclination) + comet.depthWobble;
+      const depth = Math.min(1, Math.max(0, (z + depthRange) / (depthRange * 2)));
       const scale = (0.44 + depth * 0.92) * perspective;
+      const visibility = Math.min(1, Math.max(0.22, (comet.focalLength - z) / 96));
 
       return {
-        angle: orbitAngle,
+        angle: argumentOfPeriapsis + eccentricAnomaly,
         depth,
         perspective,
         scale,
+        visibility,
         x,
         y,
         z,
@@ -134,30 +150,30 @@ export default function DitherLogo() {
       comets = [
         ...comets,
         {
-          angularVelocity: 0.0024 + Math.random() * 0.0016,
+          angularVelocity: 0.00135 + Math.random() * 0.00075,
           bornAt: now,
-          depthPhase: (Math.random() - 0.5) * 1.4,
-          depthRadius: 26 + Math.random() * 28,
-          depthSpeed: 0.001 + Math.random() * 0.0012,
-          depthWobble: 6 + Math.random() * 10,
+          depthSpeed: 0.00065 + Math.random() * 0.00035,
+          depthWobble: 1.5 + Math.random() * 3.5,
+          driftAmountA: 2 + Math.random() * 4,
+          driftAmountB: 1 + Math.random() * 3,
+          driftSpeedA: 0.0007 + Math.random() * 0.0006,
+          driftSpeedB: 0.0009 + Math.random() * 0.0008,
           direction: Math.random() > 0.5 ? 1 : -1,
-          ellipseRatio: 0.92 + Math.random() * 0.1,
-          focalLength: 118 + Math.random() * 36,
+          eccentricity: 0.16 + Math.random() * 0.28,
+          focalLength: 156 + Math.random() * 28,
           id: nextCometId,
+          inclination: 0.52 + Math.random() * 0.34,
           launchDuration: 680 + Math.random() * 220,
-          orbitScale: 1.02 + Math.random() * 0.18,
+          orbitScale: 0.96 + Math.random() * 0.14,
           phase: Math.random() * Math.PI * 2,
-          radialAmplitude: 5 + Math.random() * 8,
-          radialSpeed: 0.001 + Math.random() * 0.0012,
-          radiusOffset: Math.random() * 18 - 9,
+          periapsisAngle: Math.random() * Math.PI * 2,
+          phaseDriftSpeed: 0.00045 + Math.random() * 0.00035,
+          precessionSpeed: (Math.random() - 0.5) * 0.00018,
+          radiusOffset: Math.random() * 12 - 6,
           startAngle: -Math.PI / 2 + (Math.random() - 0.5) * 0.28,
           tilt: (Math.random() - 0.5) * 0.32,
-          verticalAmplitude: 2 + Math.random() * 5,
-          verticalSpeed: 0.0008 + Math.random() * 0.0011,
-          wobbleAmountA: 0.12 + Math.random() * 0.15,
-          wobbleAmountB: 0.05 + Math.random() * 0.09,
-          wobbleSpeedA: 0.0007 + Math.random() * 0.0013,
-          wobbleSpeedB: 0.0011 + Math.random() * 0.0017,
+          verticalAmplitude: 0.8 + Math.random() * 1.8,
+          verticalSpeed: 0.00055 + Math.random() * 0.00035,
         },
       ];
       nextCometId += 1;
@@ -255,8 +271,8 @@ export default function DitherLogo() {
 
     const drawComet = (comet, time, centerX, centerY, orbitRadius) => {
       const pose = getCometPose(comet, time, orbitRadius);
-      const headRadius = 2.15 + pose.scale * 1.85;
-      const trailOpacity = 0.22 + pose.depth * 0.46;
+      const headRadius = Math.min(11, 2.15 + pose.scale * 1.85);
+      const trailOpacity = (0.18 + pose.depth * 0.38) * pose.visibility;
 
       sceneContext.save();
       sceneContext.translate(centerX, centerY);
@@ -274,7 +290,7 @@ export default function DitherLogo() {
         const next = getCometPose(comet, Math.max(comet.bornAt, sampleTime - 42), orbitRadius);
         const segmentFade = (1 - index / 16) * trailOpacity;
         sceneContext.strokeStyle = `rgba(255, 255, 255, ${segmentFade})`;
-        sceneContext.lineWidth = Math.max(1.15, headRadius * (1 - index / 18));
+        sceneContext.lineWidth = Math.min(8.5, Math.max(1.15, headRadius * (1 - index / 18)));
         sceneContext.beginPath();
         sceneContext.moveTo(current.x, current.y);
         sceneContext.lineTo(next.x, next.y);
@@ -289,16 +305,16 @@ export default function DitherLogo() {
         pose.y,
         headRadius * 1.35,
       );
-      headGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-      headGradient.addColorStop(0.35, 'rgba(228, 228, 228, 0.98)');
-      headGradient.addColorStop(0.72, 'rgba(132, 132, 132, 0.94)');
+      headGradient.addColorStop(0, `rgba(255, 255, 255, ${pose.visibility})`);
+      headGradient.addColorStop(0.35, `rgba(228, 228, 228, ${0.98 * pose.visibility})`);
+      headGradient.addColorStop(0.72, `rgba(132, 132, 132, ${0.94 * pose.visibility})`);
       headGradient.addColorStop(1, 'rgba(34, 34, 34, 0)');
       sceneContext.fillStyle = headGradient;
       sceneContext.beginPath();
       sceneContext.arc(pose.x, pose.y, headRadius, 0, Math.PI * 2);
       sceneContext.fill();
 
-      sceneContext.fillStyle = `rgba(255, 255, 255, ${0.92 + pose.depth * 0.08})`;
+      sceneContext.fillStyle = `rgba(255, 255, 255, ${(0.84 + pose.depth * 0.1) * pose.visibility})`;
       sceneContext.beginPath();
       sceneContext.arc(
         pose.x - headRadius * 0.22,
@@ -388,10 +404,10 @@ export default function DitherLogo() {
       const offsetX = CANVAS_SIZE / 2 - leftExtent * scale * shrinkScale;
       const offsetY = CANVAS_SIZE / 2 - topExtent * scale * shrinkScale;
       const centerX = CANVAS_SIZE / 2;
-      const centerY = CANVAS_SIZE / 2;
+      const centerY = CANVAS_SIZE / 2 - drawHeight * 0.075;
       const bandCount = 7;
       const bandHeight = drawHeight / bandCount;
-      const orbitRadius = Math.max(orbitWidth, orbitHeight) * 0.52;
+      const orbitRadius = Math.max(orbitWidth, orbitHeight) * 0.49;
       const cometLayers = comets.map((comet) => ({
         comet,
         pose: getCometPose(comet, time, orbitRadius),
