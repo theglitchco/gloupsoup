@@ -37,6 +37,8 @@ const ethos = [
 ];
 
 export default function App() {
+  const currentYear = new Date().getFullYear();
+
   return (
     <div className="site-shell">
       <div className="logo-background" aria-hidden="true">
@@ -123,6 +125,10 @@ export default function App() {
             ))}
           </div>
         </section>
+
+        <footer className="site-footer">
+          <p>made in hackney wick, london, ooze from theglitch.co, {currentYear}</p>
+        </footer>
       </main>
     </div>
   );

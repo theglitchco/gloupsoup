@@ -45,8 +45,9 @@ The deploy flow builds `dist/` and publishes it to `gh-pages`. The custom domain
 
 - The hero logo is rendered through a canvas dither pass in `src/components/DitherLogo.jsx`.
 - The SVG source is normalized from its `viewBox` before animation so Chrome matches Firefox and Safari sizing.
-- Hero spacing is primarily controlled in `src/styles.css` via `.page`, `.logo-canvas`, and the mobile/tablet media queries.
+- Hero spacing and large-screen logo scaling are primarily controlled in `src/styles.css` via `.page`, `.logo-canvas`, and the responsive media queries.
 - The site background is intentionally flat `#050505` to match the dither field behind the logo.
+- The footer copy and current year are rendered in `src/App.jsx` and styled in `src/styles.css`.
 
 ## Search indexing
 
@@ -63,4 +64,4 @@ The site includes:
 
 - `gloup-soup-v1/` is local handover/reference material only and is ignored from git.
 - Avoid committing secrets, tokens, `.env` files, or private media not meant for publication.
-- Current deployment was most recently published from `main` commit `cb7c06b`.
+- Current deployment was most recently published after the final logo/footer pass from `main`.

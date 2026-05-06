@@ -76,11 +76,11 @@ select {
 
 .logo-canvas {
   display: block;
-  width: clamp(360px, 40vw, 504px);
-  height: clamp(360px, 40vw, 504px);
+  width: clamp(432px, 48vw, 605px);
+  height: clamp(432px, 48vw, 605px);
   aspect-ratio: 1 / 1;
-  max-width: min(100vw, 504px);
-  max-height: min(100vw, 504px);
+  max-width: min(100vw, 605px);
+  max-height: min(100vw, 605px);
   image-rendering: pixelated;
 }
 
@@ -111,6 +111,7 @@ select {
 
 .hero-copy {
   align-self: end;
+  min-width: 0;
   max-width: none;
   padding: 18px 20px 28px;
   background: linear-gradient(
@@ -133,6 +134,33 @@ select {
 
 .hero-copy h1 {
   white-space: nowrap;
+}
+
+@media (min-width: 1280px) {
+  .logo-canvas {
+    width: clamp(500px, 34vw, 720px);
+    height: clamp(500px, 34vw, 720px);
+    max-width: min(100vw, 720px);
+    max-height: min(100vw, 720px);
+  }
+
+  .page {
+    width: min(calc(100% - 48px), 1320px);
+  }
+
+  .hero,
+  .content-grid {
+    grid-template-columns: minmax(0, 1.95fr) minmax(300px, 0.72fr);
+  }
+
+  .hero-copy,
+  .hero-copy h1 {
+    white-space: nowrap;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(1.3rem, 1.55vw, 1.95rem);
+  }
 }
 
 .hero-copy h1 span {
@@ -248,6 +276,21 @@ dd,
 .trailer-section,
 .archive-section {
   margin-top: 36px;
+}
+
+.site-footer {
+  margin-top: 48px;
+  padding: 0 4px 24px;
+  text-align: center;
+}
+
+.site-footer p {
+  margin: 0;
+  font-size: 0.58rem;
+  line-height: 1.8;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-soft);
 }
 
 .section-heading {
@@ -381,7 +424,8 @@ dd,
   .hero-meta p,
   .hero-panel,
   .copy-panel,
-  .trailer-fallback {
+  .trailer-fallback,
+  .site-footer {
     padding: 16px;
   }
 
