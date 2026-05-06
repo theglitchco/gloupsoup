@@ -27,6 +27,13 @@ npm run deploy
 
 That command pushes the built `dist/` folder to `gh-pages`.
 
+## Current visual state
+
+- The page background is intentionally flat black: `#050505`.
+- The hero logo is canvas-rendered and dithered from `src/assets/gloup_blank_solo.svg`.
+- `src/components/DitherLogo.jsx` now normalizes the SVG from its `viewBox` before drawing, which fixes the previous Chrome-only overscale and crop bug.
+- Desktop hero spacing is intentionally tight, while tablet and phone top padding is larger to keep the stacked layout clear of the logo.
+
 ## Files to edit most often
 
 - `src/App.jsx`
@@ -36,9 +43,9 @@ That command pushes the built `dist/` folder to `gh-pages`.
 - `src/components/TrailerPlayer.jsx`
   Trailer behavior and poster handling.
 - `src/components/DitherLogo.jsx`
-  Logo animation and dither rendering.
+  Logo animation, SVG normalization, and dither rendering.
 - `src/styles.css`
-  Layout, responsive spacing, and visual tweaks.
+  Layout, responsive spacing, background color, and visual tweaks.
 
 ## Public assets
 
@@ -62,3 +69,4 @@ The site is explicitly indexable via:
 - `gloup-soup-v1/` is handover/reference material only and should stay out of git.
 - Do not commit credentials, auth tokens, `.env` files, or private operational notes.
 - Keep the custom domain as `gloupsoup.com` unless explicitly instructed otherwise.
+- Latest pushed and deployed `main` commit at handoff: `cb7c06b` (`Fix logo sizing and finalize hero spacing`).
