@@ -100,6 +100,7 @@ select {
 }
 
 .content-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: 32px;
 }
 
@@ -150,6 +151,10 @@ select {
 
   .hero,
   .content-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hero {
     grid-template-columns: minmax(0, 1.95fr) minmax(300px, 0.72fr);
   }
 
