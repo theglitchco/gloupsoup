@@ -42,6 +42,10 @@ select {
   font: inherit;
 }
 
+button {
+  color: inherit;
+}
+
 #root {
   min-height: 100vh;
   background: #050505;
@@ -540,6 +544,11 @@ dd,
   gap: 8px;
   width: min(100%, 132px);
   justify-items: end;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: inherit;
 }
 
 .poster-thumb-frame {
@@ -612,10 +621,80 @@ dd,
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
 }
 
+.poster-card:focus-visible {
+  outline: none;
+}
+
 .poster-card:hover .poster-preview,
 .poster-card:focus-visible .poster-preview {
   opacity: 1;
   transform: translateX(0) scale(1);
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(6px);
+}
+
+.lightbox-frame {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  max-width: min(92vw, 980px);
+  max-height: calc(100vh - 72px);
+}
+
+.lightbox-image {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 132px);
+  width: auto;
+  height: auto;
+  border: 1px solid var(--border-strong);
+  background: #050505;
+  box-shadow: 0 32px 96px rgba(0, 0, 0, 0.55);
+}
+
+.lightbox-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.58rem;
+  line-height: 1.8;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+    rgba(0, 0, 0, 0.72);
+  cursor: pointer;
+  font-size: 0.58rem;
+  line-height: 1.8;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.lightbox-close:hover,
+.lightbox-close:focus-visible {
+  color: #f2f2f2;
+  border-color: var(--border-strong);
 }
 
 .filmography {
@@ -845,6 +924,15 @@ dd,
 
   .poster-preview {
     display: none;
+  }
+
+  .lightbox {
+    padding: 20px;
+  }
+
+  .lightbox-caption {
+    flex-direction: column;
+    gap: 4px;
   }
 
   .filmography-list li {

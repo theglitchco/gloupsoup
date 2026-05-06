@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import DitherLogo from './components/DitherLogo';
 import TrailerPlayer from './components/TrailerPlayer';
 import { currentIncubator, previousIncubators } from './data/incubators';
@@ -69,6 +70,28 @@ const getDirectorStyle = (name) => {
 
 export default function App() {
   const currentYear = new Date().getFullYear();
+  const [activePoster, setActivePoster] = useState(null);
+
+  useEffect(() => {
+    if (!activePoster) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setActivePoster(null);
+      }
+    };
+
+    const { overflow } = document.body.style;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = overflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activePoster]);
 
   return (
     <div className="site-shell">
@@ -233,12 +256,17 @@ export default function App() {
                     {incubator.posters?.length ? (
                       <aside className="poster-dock" aria-label={`${incubator.volume} posters`}>
                         {incubator.posters.map((poster) => (
-                          <a
+                          <button
+                            type="button"
                             key={`${incubator.volume}-${poster.label}`}
                             className="poster-card"
-                            href={poster.src}
-                            target="_blank"
-                            rel="noreferrer"
+                            onClick={() =>
+                              setActivePoster({
+                                src: poster.src,
+                                label: poster.label,
+                                volume: incubator.volume,
+                              })
+                            }
                           >
                             <span className="poster-thumb-frame">
                               <img
@@ -252,7 +280,7 @@ export default function App() {
                             <span className="poster-preview" aria-hidden="true">
                               <img src={poster.src} alt="" loading="lazy" />
                             </span>
-                          </a>
+                          </button>
                         ))}
                       </aside>
                     ) : null}
@@ -311,6 +339,36 @@ export default function App() {
           </p>
         </footer>
       </main>
+
+      {activePoster ? (
+        <div
+          className="lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${activePoster.volume} ${activePoster.label}`}
+          onClick={() => setActivePoster(null)}
+        >
+          <button
+            type="button"
+            className="lightbox-close"
+            aria-label="Close poster preview"
+            onClick={() => setActivePoster(null)}
+          >
+            Close
+          </button>
+          <div className="lightbox-frame" onClick={(event) => event.stopPropagation()}>
+            <img
+              className="lightbox-image"
+              src={activePoster.src}
+              alt={`${activePoster.volume} ${activePoster.label}`}
+            />
+            <p className="lightbox-caption">
+              <span>{activePoster.volume}</span>
+              <span>{activePoster.label}</span>
+            </p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

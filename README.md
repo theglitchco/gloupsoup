@@ -1,58 +1,62 @@
-# Gloup Soup
+# gloup soup
 
-Gloup Soup is an incubator for small films, loose ideas, experiments, and things that should probably not stay in drawers.
+<!-- README.md -->
 
-This repository contains the source for the current site at `https://gloupsoup.com/`.
+```text
+──────────────────────────────────────────────────────────────────────────────
 
-Built with React and Vite. Published to GitHub Pages.
+                         G L O U P   S O U P   v 2
+                     ooze / wick / soup / films / fumes
 
-## What The Site Contains
+──────────────────────────────────────────────────────────────────────────────
 
-- a hero section with the custom dithered Gloup logo canvas treatment
-- current incubator information for the upcoming volume
-- trailer / teaser support through `public/media/incubator-trailer-v1.mp4`
-- overview and ethos copy
-- a previous incubators archive with per-volume metadata, film listings, hover interactions, and poster previews
+  this is the site shell for an incubator where things are made quickly,
+  strangely, cheaply, and before they can become too respectable.
 
-## Archive Data
+  one word appears.
+  people gather.
+  films happen.
+  something screens.
+  another word follows.
 
-The archive is maintained in `src/data/incubators.js`.
+──────────────────────────────────────────────────────────────────────────────
 
-Each previous volume can now contain:
+  contains:
 
-- theme title and period
-- descriptive volume copy
-- workshop date, screening date, runtime, and film count
-- full film list with director credits
-- muted per-volume accent colours for the accordion styling
-- local poster references for volumes with poster artwork
+    • a dithered main emblem suspended in black
+    • current volume signal
+    • trailer aperture
+    • overview / ethos / invitation
+    • previous volume archive
+    • film listings, poster fragments, traces of what has already happened
 
-Poster assets used by the archive live in `public/` as `poster-vol*.{png,jpg,jpeg}` so the production site does not rely on external Dropbox or Google Sheet URLs at runtime.
+──────────────────────────────────────────────────────────────────────────────
 
-## Development
+  archive notes:
 
-Install dependencies and run the dev server:
+    • previous volumes are embedded locally
+    • poster artifacts are stored in /public
+    • no live sheet dependency in the client
+    • some titles remain uncertain on purpose
 
-```sh
-npm install
-npm run dev
+──────────────────────────────────────────────────────────────────────────────
+
+  transmission:
+
+    https://gloupsoup.com/
+
+──────────────────────────────────────────────────────────────────────────────
+
+  maintenance ritual:
+
+    npm run lint
+    npm run build
+    npm run deploy
+
+──────────────────────────────────────────────────────────────────────────────
+
+  made in hackney wick, london
+  ooze from theglitch.co
+
+──────────────────────────────────────────────────────────────────────────────
 ```
-
-Run checks:
-
-```sh
-npm run lint
-npm run build
-```
-
-Deploy to GitHub Pages:
-
-```sh
-npm run deploy
-```
-
-## Notes
-
-- The Google Sheet used to assemble the archive should not be embedded in client code.
-- Archive poster assets are intentionally stored locally in `public/`.
-- The main site styles and most interaction tuning live in `src/styles.css`.
