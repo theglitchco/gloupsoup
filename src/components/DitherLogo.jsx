@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import logoUrl from '../assets/gloup_blank_solo.svg';
+import logoSvgMarkup from '../assets/gloup_blank_solo.svg?raw';
 
 const MATRIX = [
   [0, 8, 2, 10],
@@ -11,6 +11,35 @@ const MATRIX = [
 const CANVAS_SIZE = 260;
 const BACKGROUND_VALUE = 5;
 
+function buildLogoSource(svgMarkup) {
+  const parser = new DOMParser();
+  const document = parser.parseFromString(svgMarkup, 'image/svg+xml');
+  const svg = document.documentElement;
+  const viewBox = svg.getAttribute('viewBox')?.trim().split(/[\s,]+/).map(Number) ?? [];
+  const [, , viewBoxWidth = 512, viewBoxHeight = 512] = viewBox;
+
+  if (!svg.getAttribute('width')) {
+    svg.setAttribute('width', String(viewBoxWidth));
+  }
+
+  if (!svg.getAttribute('height')) {
+    svg.setAttribute('height', String(viewBoxHeight));
+  }
+
+  if (!svg.getAttribute('preserveAspectRatio')) {
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  }
+
+  const blob = new Blob([svg.outerHTML], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+
+  return {
+    height: viewBoxHeight,
+    url,
+    width: viewBoxWidth,
+  };
+}
+
 export default function DitherLogo() {
   const canvasRef = useRef(null);
 
@@ -20,6 +49,7 @@ export default function DitherLogo() {
     const sceneCanvas = document.createElement('canvas');
     const sceneContext = sceneCanvas.getContext('2d', { willReadFrequently: true });
     const image = new Image();
+    const logoSource = buildLogoSource(logoSvgMarkup);
 
     let frameId = 0;
     let active = true;
@@ -29,6 +59,8 @@ export default function DitherLogo() {
       const sampleCanvas = document.createElement('canvas');
       const sampleSize = 512;
       const padding = 24;
+      const sourceWidth = logoSource.width;
+      const sourceHeight = logoSource.height;
       sampleCanvas.width = sampleSize;
       sampleCanvas.height = sampleSize;
       const sampleContext = sampleCanvas.getContext('2d', { willReadFrequently: true });
@@ -59,10 +91,10 @@ export default function DitherLogo() {
       maxX = Math.min(sampleSize - 1, maxX + padding);
       maxY = Math.min(sampleSize - 1, maxY + padding);
 
-      const boundsX = (minX / sampleSize) * image.width;
-      const boundsY = (minY / sampleSize) * image.height;
-      const boundsWidth = ((maxX - minX + 1) / sampleSize) * image.width;
-      const boundsHeight = ((maxY - minY + 1) / sampleSize) * image.height;
+      const boundsX = (minX / sampleSize) * sourceWidth;
+      const boundsY = (minY / sampleSize) * sourceHeight;
+      const boundsWidth = ((maxX - minX + 1) / sampleSize) * sourceWidth;
+      const boundsHeight = ((maxY - minY + 1) / sampleSize) * sourceHeight;
 
       sourceMetrics = {
         x: boundsX,
@@ -164,15 +196,18 @@ export default function DitherLogo() {
       canvas.height = CANVAS_SIZE;
       sceneCanvas.width = CANVAS_SIZE;
       sceneCanvas.height = CANVAS_SIZE;
+      context.imageSmoothingEnabled = false;
+      sceneContext.imageSmoothingEnabled = true;
       extractSourceBounds();
       render(0);
     };
 
-    image.src = logoUrl;
+    image.src = logoSource.url;
 
     return () => {
       active = false;
       window.cancelAnimationFrame(frameId);
+      URL.revokeObjectURL(logoSource.url);
     };
   }, []);
 
