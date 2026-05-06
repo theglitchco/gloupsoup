@@ -38,23 +38,38 @@ That command pushes the built `dist/` folder to `gh-pages`.
 - The logo has a click-triggered comet system with a maximum live pool of 10, replacement explosions, a capped click-driven logo shrink, and a calmer orbital depth model intended to feel 3D without comets rushing the camera.
 - The logo layer is visually behind the content, but the page uses pointer-event passthrough in non-interactive space so the logo can still be clicked around the hero content.
 - The visible logo stage is intentionally modest in size, while the hidden internal canvas is much larger to give the comet system room before it hits drawable edges.
+- The hero panel heading `VOLUME X SOON` has a subtle pulse on the `X`.
+- The final `Have fun.` ethos line is intentionally animated with a toned-down fast jitter.
+- The `Previous Incubators` accordion is now a richer archive with per-volume colour accents, real volume metadata, film lists, and compact poster previews.
+- Film titles marked as uncertain use a small animated `?`.
+- Director names in archive film lists brighten, scale, and wiggle on hover based on how many films that person directed across the archive.
+- The main logo stage has been scaled up by roughly 10% across breakpoints, with matching mobile/tablet top-padding adjustments so the layout still clears cleanly.
 
 ## Files to edit most often
 
 - `src/App.jsx`
-  Hero text, overview, ethos, section ordering, and page copy.
+  Hero text, overview, ethos, section ordering, archive rendering, and page copy.
 - `src/data/incubators.js`
-  Current incubator details and previous incubator entries.
+  Current incubator details, previous incubator entries, archive metadata, poster mappings, and per-volume accent colours.
 - `src/components/TrailerPlayer.jsx`
   Trailer behavior and poster handling.
 - `src/components/DitherLogo.jsx`
   Logo animation, SVG normalization, dither rendering, comet interaction/orbit system, and click-driven shrink behavior.
 - `src/styles.css`
-  Layout, responsive spacing, background/logo layering, pointer-event passthrough, footer styling, and visual tweaks.
+  Layout, responsive spacing, background/logo layering, archive styling, hover interactions, pointer-event passthrough, footer styling, and visual tweaks.
 
 ## Public assets
 
 - trailer video: `public/media/incubator-trailer-v1.mp4`
+- archive posters:
+  `public/poster-vol4-screening.png`
+  `public/poster-vol6-workshop.jpg`
+  `public/poster-vol6-screening.jpg`
+  `public/poster-vol7-screening.jpg`
+  `public/poster-vol8-workshop.png`
+  `public/poster-vol8-screening.jpeg`
+  `public/poster-vol9-workshop.png`
+  `public/poster-vol9-screening.jpg`
 - Pages domain file: `public/CNAME`
 - indexing files: `public/robots.txt`, `public/sitemap.xml`
 
@@ -74,4 +89,5 @@ The site is explicitly indexable via:
 - `gloup-soup-v1/` is handover/reference material only and should stay out of git.
 - Do not commit credentials, auth tokens, `.env` files, or private operational notes.
 - Keep the custom domain as `gloupsoup.com` unless explicitly instructed otherwise.
-- Latest pushed and deployed `main` commit at handoff should include the final comet/orbit tuning and background interaction layering from this session.
+- The Google Sheet URL should not be embedded in client code; the current archive data has been copied into local source files and poster assets downloaded into `public/`.
+- Latest local state at handoff includes the archive redesign, imported volume metadata, local poster assets, director hover tuning, and hero/ethos text animations from this session.
