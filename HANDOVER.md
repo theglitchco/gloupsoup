@@ -35,6 +35,8 @@ That command pushes the built `dist/` folder to `gh-pages`.
 - Desktop hero spacing is intentionally tight, while tablet and phone top padding is larger to keep the stacked layout clear of the logo.
 - There is an additional wide-desktop tuning path in `src/styles.css` for larger monitors so the logo can scale up without the hero heading colliding with the current-volume panel.
 - The footer is centered and rendered as: `made in hackney wick, london, ooze from theglitch.co, {currentYear}`.
+- The logo has a click-triggered comet system with a maximum live pool of 10, replacement explosions, depth-based scaling, and a capped click-driven logo shrink.
+- The logo layer is visually behind the content, but the page uses pointer-event passthrough in non-interactive space so the logo can still be clicked around the hero content.
 
 ## Files to edit most often
 
@@ -45,9 +47,9 @@ That command pushes the built `dist/` folder to `gh-pages`.
 - `src/components/TrailerPlayer.jsx`
   Trailer behavior and poster handling.
 - `src/components/DitherLogo.jsx`
-  Logo animation, SVG normalization, and dither rendering.
+  Logo animation, SVG normalization, dither rendering, comet interaction system, and click-driven shrink behavior.
 - `src/styles.css`
-  Layout, responsive spacing, background color, footer styling, and visual tweaks.
+  Layout, responsive spacing, background/logo layering, footer styling, and visual tweaks.
 
 ## Public assets
 
@@ -71,4 +73,4 @@ The site is explicitly indexable via:
 - `gloup-soup-v1/` is handover/reference material only and should stay out of git.
 - Do not commit credentials, auth tokens, `.env` files, or private operational notes.
 - Keep the custom domain as `gloupsoup.com` unless explicitly instructed otherwise.
-- Latest pushed and deployed `main` commit at handoff is whichever commit includes the final footer and large-screen logo adjustments from this session.
+- Latest pushed and deployed `main` commit at handoff should include the final comet/background layering adjustments from this session.

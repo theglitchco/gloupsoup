@@ -41,7 +41,7 @@ export default function App() {
 
   return (
     <div className="site-shell">
-      <div className="logo-background" aria-hidden="true">
+      <div className="logo-background">
         <div className="logo-anchor">
           <DitherLogo />
         </div>
@@ -50,9 +50,11 @@ export default function App() {
       <main className="page" id="top">
         <section className="hero">
           <div className="hero-copy">
-            <p className="eyebrow">Gloup Soup Incubator VOL 9</p>
+            <p className="eyebrow">Gloup Soup Incubator</p>
             <h1>Come and make films.</h1>
-            <p>One-word theme. Two weeks deadline.</p>
+            <p className="hero-subcopy">
+              <span>One-word theme.</span> <span>Two weeks deadline.</span>
+            </p>
           </div>
 
           <div className="hero-panel">
@@ -76,7 +78,16 @@ export default function App() {
               </div>
               <div>
                 <dt>Instagram</dt>
-                <dd>{currentIncubator.instagram}</dd>
+                <dd>
+                  <a
+                    className="inline-link"
+                    href="https://www.instagram.com/gloup.soup/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {currentIncubator.instagram}
+                  </a>
+                </dd>
               </div>
             </dl>
           </div>
@@ -97,8 +108,11 @@ export default function App() {
           <aside className="copy-panel">
             <p className="panel-heading">Ethos</p>
             <ul className="ethos-list">
-              {ethos.map((item) => (
-                <li key={item.lead}>
+              {ethos.map((item, index) => (
+                <li
+                  key={item.lead}
+                  className={index % 2 === 1 ? 'ethos-item ethos-item-alt' : 'ethos-item'}
+                >
                   {item.lead}
                   {item.detail ? ` ${item.detail}` : ''}
                 </li>
@@ -127,7 +141,18 @@ export default function App() {
         </section>
 
         <footer className="site-footer">
-          <p>made in hackney wick, london, ooze from theglitch.co, {currentYear}</p>
+          <p>
+            made in hackney wick, london, ooze from{' '}
+            <a
+              className="inline-link"
+              href="https://theglitch.co/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              theglitch.co
+            </a>
+            , {currentYear}
+          </p>
         </footer>
       </main>
     </div>

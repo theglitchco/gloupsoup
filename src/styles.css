@@ -60,9 +60,10 @@ select {
 
 .logo-background {
   position: absolute;
-  top: -36px;
+  top: 0;
   left: 0;
   right: 0;
+  height: 100vh;
   z-index: 0;
   display: flex;
   justify-content: center;
@@ -70,18 +71,40 @@ select {
 }
 
 .logo-anchor {
-  display: inline-flex;
-  padding: 8px;
+  position: relative;
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  justify-content: center;
+  align-items: flex-start;
+  pointer-events: auto;
+}
+
+.logo-stage {
+  position: absolute;
+  top: -36px;
+  left: 50%;
+  width: clamp(432px, 48vw, 605px);
+  height: clamp(432px, 48vw, 605px);
+  transform: translateX(-50%);
 }
 
 .logo-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   display: block;
-  width: clamp(432px, 48vw, 605px);
-  height: clamp(432px, 48vw, 605px);
+  width: calc(100% * 2.1);
+  height: calc(100% * 2.1);
+  transform: translate(-50%, -50%);
   aspect-ratio: 1 / 1;
-  max-width: min(100vw, 605px);
-  max-height: min(100vw, 605px);
   image-rendering: pixelated;
+  cursor: pointer;
+}
+
+.logo-canvas:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.42);
+  outline-offset: 6px;
 }
 
 .page {
@@ -90,6 +113,7 @@ select {
   width: min(calc(100% - 32px), var(--page-width));
   margin: 0 auto;
   padding: 36px 0 72px;
+  pointer-events: none;
 }
 
 .hero,
@@ -108,13 +132,17 @@ select {
   align-items: end;
   min-height: min(86vh, 880px);
   padding-bottom: 20px;
+  pointer-events: none;
 }
 
 .hero-copy {
+  position: relative;
+  z-index: 2;
   align-self: end;
   min-width: 0;
   max-width: none;
   padding: 18px 20px 28px;
+  pointer-events: auto;
   background: linear-gradient(
     180deg,
     rgba(0, 0, 0, 0.34) 0%,
@@ -137,12 +165,15 @@ select {
   white-space: nowrap;
 }
 
+.hero-subcopy span {
+  display: inline;
+}
+
 @media (min-width: 1280px) {
-  .logo-canvas {
+  .logo-stage {
+    top: -36px;
     width: clamp(500px, 34vw, 720px);
     height: clamp(500px, 34vw, 720px);
-    max-width: min(100vw, 720px);
-    max-height: min(100vw, 720px);
   }
 
   .page {
@@ -192,6 +223,45 @@ summary span,
   color: var(--text-soft);
 }
 
+.inline-link {
+  position: relative;
+  display: inline-block;
+  color: #f2f2f2;
+  transition:
+    color 180ms ease,
+    transform 180ms ease,
+    text-shadow 180ms ease;
+}
+
+.inline-link::after {
+  position: absolute;
+  left: 0;
+  bottom: -0.18rem;
+  width: 100%;
+  height: 1px;
+  content: '';
+  background: currentColor;
+  transform: scaleX(0.18);
+  transform-origin: left center;
+  opacity: 0.55;
+  transition:
+    transform 220ms ease,
+    opacity 220ms ease;
+}
+
+.inline-link:hover,
+.inline-link:focus-visible {
+  color: #ffffff;
+  transform: translateY(-1px);
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.2);
+}
+
+.inline-link:hover::after,
+.inline-link:focus-visible::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
 .hero-meta {
   display: flex;
   flex-wrap: wrap;
@@ -221,7 +291,30 @@ summary span,
 .hero-panel,
 .copy-panel,
 .trailer-fallback {
+  position: relative;
+  z-index: 2;
   padding: 22px;
+  pointer-events: auto;
+}
+
+.hero-panel {
+  pointer-events: auto;
+}
+
+.trailer-video,
+.accordion-item,
+.site-footer {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.trailer-section,
+.content-grid,
+.archive-section {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
 }
 
 .detail-grid {
@@ -269,6 +362,11 @@ dd,
   padding-left: 18px;
   font-size: 0.7rem;
   line-height: 2;
+}
+
+.ethos-item-alt {
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.08);
 }
 
 .ethos-list li::before {
@@ -367,10 +465,15 @@ dd,
 
 @media (max-width: 860px) {
   .logo-background {
-    top: -6px;
+    top: 0;
   }
 
   .logo-canvas {
+    width: calc(100% * 2.1);
+    height: calc(100% * 2.1);
+  }
+
+  .logo-stage {
     width: clamp(420px, 72vw, 560px);
     height: clamp(420px, 72vw, 560px);
   }
@@ -386,6 +489,10 @@ dd,
 
   .hero-copy h1 {
     white-space: normal;
+  }
+
+  .hero-subcopy span {
+    display: block;
   }
 
   .hero,
@@ -405,17 +512,18 @@ dd,
 
 @media (max-width: 560px) {
   .logo-background {
-    top: -2px;
-  }
-
-  .logo-canvas {
-    width: clamp(280px, 84vw, 340px);
-    height: clamp(280px, 84vw, 340px);
+    top: 0;
   }
 
   .page {
     padding-top: 320px;
     padding-bottom: 56px;
+  }
+
+  .logo-stage {
+    top: -2px;
+    width: clamp(280px, 84vw, 340px);
+    height: clamp(280px, 84vw, 340px);
   }
 
   .hero-copy {
