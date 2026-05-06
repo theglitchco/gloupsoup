@@ -3,60 +3,62 @@
 <!-- README.md -->
 
 ```text
-──────────────────────────────────────────────────────────────────────────────
+ ┌───────────────────────────────────────────────────────────────────────┐
+ │   ________  .____       ________  ____ ___  ________    ________      │
+ │  /  _____/  |    |     /  _____/ |    |   \/  _____/   /  _____/      │
+ │ /   \  ___  |    |    /   \  ___ |    |   /   \  ___  /   \  ___      │
+ │ \    \_\  \ |    |___ \    \_\  \|    |  /\    \_\  \ \    \_\  \     │
+ │  \______  / |_______ \ \______  /|______/  \______  /  \______  /     │
+ │         \/          \/        \/                  \/          \/      │
+ │                                                                       │
+ │   _________   ________  ___  ___  ________                            │
+ │  /   _____/  /  _____/ /  / /  / /  _____/                            │
+ │  \_____  \  /   \  ___/  /_/  / /   \  ___                            │
+ │  /        \ \    \_\  \____  /  \    \_\  \                           │
+ │ /_______  /  \______  /    \/    \______  /                           │
+ │         \/          \/                  \/                            │
+ └───────────────────────────────────────────────────────────────────────┘
 
-                         G L O U P   S O U P   v 2
-                     ooze / wick / soup / films / fumes
+   [ release ]
 
-──────────────────────────────────────────────────────────────────────────────
+     name........... Gloup.Soup.v2.Web.INTERNAL
+     type........... source
+     format......... react / vite / css / jsx
+     target......... github pages
+     site........... https://gloupsoup.com/
 
-  this is the site shell for an incubator where things are made quickly,
-  strangely, cheaply, and before they can become too respectable.
+   [ files ]
 
-  one word appears.
-  people gather.
-  films happen.
-  something screens.
-  another word follows.
+     src/App.jsx................ main page
+     src/data/incubators.js..... archive data
+     src/styles.css............. layout + effects
+     src/components/DitherLogo.jsx..... logo unit
+     src/components/TrailerPlayer.jsx.. trailer unit
+     public/poster-*............ local poster files
+     HANDOVER.md................ notes
 
-──────────────────────────────────────────────────────────────────────────────
+   [ contains ]
 
-  contains:
+     current volume block
+     trailer block
+     overview / ethos
+     previous volumes archive
+     poster previews
+     poster lightbox
 
-    • a dithered main emblem suspended in black
-    • current volume signal
-    • trailer aperture
-    • overview / ethos / invitation
-    • previous volume archive
-    • film listings, poster fragments, traces of what has already happened
+   [ build ]
 
-──────────────────────────────────────────────────────────────────────────────
+     npm install
+     npm run dev
+     npm run lint
+     npm run build
+     npm run deploy
 
-  archive notes:
+   [ notes ]
 
-    • previous volumes are embedded locally
-    • poster artifacts are stored in /public
-    • no live sheet dependency in the client
-    • some titles remain uncertain on purpose
+     archive data is local
+     poster assets are local
+     sheet url not shipped to client
 
-──────────────────────────────────────────────────────────────────────────────
-
-  transmission:
-
-    https://gloupsoup.com/
-
-──────────────────────────────────────────────────────────────────────────────
-
-  maintenance ritual:
-
-    npm run lint
-    npm run build
-    npm run deploy
-
-──────────────────────────────────────────────────────────────────────────────
-
-  made in hackney wick, london
-  ooze from theglitch.co
-
-──────────────────────────────────────────────────────────────────────────────
+   [ eof ]
 ```

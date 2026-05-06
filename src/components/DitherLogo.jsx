@@ -11,6 +11,8 @@ const MATRIX = [
 const CANVAS_SIZE = 1260;
 const BACKGROUND_VALUE = 5;
 const CANVAS_EXPANSION = 3.75;
+const SHRINK_STEP = 0.025;
+const MIN_SHRINK_SCALE = 0.4;
 
 function buildLogoSource(svgMarkup) {
   const parser = new DOMParser();
@@ -136,7 +138,7 @@ export default function DitherLogo() {
     const spawnComet = () => {
       const now = performance.now();
 
-       if (shrinkCount < 10) {
+      if (1 - shrinkCount * SHRINK_STEP > MIN_SHRINK_SCALE) {
         shrinkCount += 1;
       }
 
@@ -387,7 +389,7 @@ export default function DitherLogo() {
 
       sceneContext.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-      const shrinkScale = 1 - Math.min(shrinkCount, 10) * 0.025;
+      const shrinkScale = Math.max(MIN_SHRINK_SCALE, 1 - shrinkCount * SHRINK_STEP);
       const maxDimension = CANVAS_SIZE * (0.84 / CANVAS_EXPANSION);
       const leftExtent = sourceMetrics.centerX - sourceMetrics.x;
       const rightExtent = sourceMetrics.x + sourceMetrics.width - sourceMetrics.centerX;

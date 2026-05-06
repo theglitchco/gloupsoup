@@ -88,8 +88,8 @@ button {
   position: absolute;
   top: -36px;
   left: 50%;
-  width: clamp(475px, 53vw, 666px);
-  height: clamp(475px, 53vw, 666px);
+  width: clamp(570px, 63.6vw, 799px);
+  height: clamp(570px, 63.6vw, 799px);
   transform: translateX(-50%);
 }
 
@@ -176,8 +176,8 @@ button {
 @media (min-width: 1280px) {
   .logo-stage {
     top: -36px;
-    width: clamp(550px, 37.4vw, 792px);
-    height: clamp(550px, 37.4vw, 792px);
+    width: clamp(660px, 44.88vw, 950px);
+    height: clamp(660px, 44.88vw, 950px);
   }
 
   .page {
@@ -869,13 +869,13 @@ dd,
   }
 
   .logo-stage {
-    width: clamp(462px, 79.2vw, 616px);
-    height: clamp(462px, 79.2vw, 616px);
+    width: clamp(554px, 95.04vw, 739px);
+    height: clamp(554px, 95.04vw, 739px);
   }
 
   .page {
     width: min(calc(100% - 24px), var(--page-width));
-    padding-top: 410px;
+    padding-top: 462px;
   }
 
   .hero-copy {
@@ -951,14 +951,14 @@ dd,
   }
 
   .page {
-    padding-top: 344px;
+    padding-top: 398px;
     padding-bottom: 56px;
   }
 
   .logo-stage {
     top: -2px;
-    width: clamp(308px, 92.4vw, 374px);
-    height: clamp(308px, 92.4vw, 374px);
+    width: clamp(370px, 100vw, 449px);
+    height: clamp(370px, 100vw, 449px);
   }
 
   .hero-copy {
