@@ -69,18 +69,38 @@ const getDirectorStyle = (name) => {
   };
 };
 
+const getYouTubeEmbedUrl = (url) => {
+  try {
+    const parsedUrl = new URL(url);
+
+    if (parsedUrl.hostname === 'youtu.be') {
+      const videoId = parsedUrl.pathname.replace('/', '');
+      return videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0` : null;
+    }
+
+    if (parsedUrl.hostname.includes('youtube.com')) {
+      const videoId = parsedUrl.searchParams.get('v');
+      return videoId ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0` : null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+};
+
 export default function App() {
   const currentYear = new Date().getFullYear();
-  const [activePoster, setActivePoster] = useState(null);
+  const [activeMedia, setActiveMedia] = useState(null);
 
   useEffect(() => {
-    if (!activePoster) {
+    if (!activeMedia) {
       return undefined;
     }
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
-        setActivePoster(null);
+        setActiveMedia(null);
       }
     };
 
@@ -92,7 +112,7 @@ export default function App() {
       document.body.style.overflow = overflow;
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [activePoster]);
+  }, [activeMedia]);
 
   return (
     <div className="site-shell">
@@ -259,25 +279,27 @@ export default function App() {
                         {incubator.posters.map((poster) => (
                           <button
                             type="button"
-                            key={`${incubator.volume}-${poster.label}`}
+                            key={`${incubator.volume}-${poster.label || poster.src}`}
                             className="poster-card"
                             onClick={() =>
-                              setActivePoster({
+                              setActiveMedia({
+                                type: 'poster',
                                 src: poster.src,
                                 label: poster.label,
                                 volume: incubator.volume,
                               })
                             }
+                            aria-label={poster.label ? `${incubator.volume} ${poster.label}` : `${incubator.volume} poster`}
                           >
                             <span className="poster-thumb-frame">
                               <img
                                 className="poster-thumb"
                                 src={poster.src}
-                                alt={`${incubator.volume} ${poster.label}`}
+                                alt={poster.label ? `${incubator.volume} ${poster.label}` : `${incubator.volume} poster`}
                                 loading="lazy"
                               />
                             </span>
-                            <span className="poster-card-label">{poster.label}</span>
+                            {poster.label ? <span className="poster-card-label">{poster.label}</span> : null}
                             <span className="poster-preview" aria-hidden="true">
                               <img src={poster.src} alt="" loading="lazy" />
                             </span>
@@ -293,7 +315,25 @@ export default function App() {
                         {incubator.films.map((film) => (
                           <li key={`${incubator.volume}-${film.title}`}>
                             <span className={film.uncertain ? 'film-title film-title-uncertain' : 'film-title'}>
-                              <span>{film.title}</span>
+                              {film.watchLink ? (
+                                <button
+                                  type="button"
+                                  className="film-title-link"
+                                  onClick={() =>
+                                    setActiveMedia({
+                                      type: 'video',
+                                      volume: incubator.volume,
+                                      label: film.title,
+                                      src: film.watchLink,
+                                      embedSrc: getYouTubeEmbedUrl(film.watchLink),
+                                    })
+                                  }
+                                >
+                                  {film.title}
+                                </button>
+                              ) : (
+                                <span>{film.title}</span>
+                              )}
                               {film.uncertain ? (
                                 <span className="film-title-question" aria-hidden="true">
                                   ?
@@ -341,31 +381,44 @@ export default function App() {
         </footer>
       </main>
 
-      {activePoster ? (
+      {activeMedia ? (
         <div
           className="lightbox"
           role="dialog"
           aria-modal="true"
-          aria-label={`${activePoster.volume} ${activePoster.label}`}
-          onClick={() => setActivePoster(null)}
+          aria-label={activeMedia.label ? `${activeMedia.volume} ${activeMedia.label}` : `${activeMedia.volume} media`}
+          onClick={() => setActiveMedia(null)}
         >
           <button
             type="button"
             className="lightbox-close"
-            aria-label="Close poster preview"
-            onClick={() => setActivePoster(null)}
+            aria-label={activeMedia.type === 'video' ? 'Close video player' : 'Close poster preview'}
+            onClick={() => setActiveMedia(null)}
           >
             Close
           </button>
           <div className="lightbox-frame" onClick={(event) => event.stopPropagation()}>
-            <img
-              className="lightbox-image"
-              src={activePoster.src}
-              alt={`${activePoster.volume} ${activePoster.label}`}
-            />
+            {activeMedia.type === 'video' && activeMedia.embedSrc ? (
+              <div className="lightbox-video-shell">
+                <iframe
+                  className="lightbox-video"
+                  src={activeMedia.embedSrc}
+                  title={`${activeMedia.volume} ${activeMedia.label}`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <img
+                className="lightbox-image"
+                src={activeMedia.src}
+                alt={activeMedia.label ? `${activeMedia.volume} ${activeMedia.label}` : `${activeMedia.volume} poster`}
+              />
+            )}
             <p className="lightbox-caption">
-              <span>{activePoster.volume}</span>
-              <span>{activePoster.label}</span>
+              <span>{activeMedia.volume}</span>
+              {activeMedia.label ? <span>{activeMedia.label}</span> : null}
             </p>
           </div>
         </div>

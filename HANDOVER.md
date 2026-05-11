@@ -42,6 +42,7 @@ That command pushes the built `dist/` folder to `gh-pages`.
 - The hero panel heading `VOLUME X SOON` has a subtle pulse on the `X`.
 - The final `Have fun.` ethos line is intentionally animated with a toned-down fast jitter.
 - The `Previous Incubators` accordion is now a richer archive with per-volume colour accents, real volume metadata, film lists, and compact poster previews.
+- Archive film titles with `watchLink` now open in the same lightbox overlay as posters when the link is a YouTube URL, rather than sending the user off-page.
 - Film titles marked as uncertain use a small animated `?`.
 - Director names in archive film lists brighten, scale, and wiggle on hover based on how many films that person directed across the archive.
 - The main logo stage has been scaled up by roughly 10% across breakpoints, with matching mobile/tablet top-padding adjustments so the layout still clears cleanly.
@@ -68,6 +69,7 @@ That command pushes the built `dist/` folder to `gh-pages`.
   `public/media/overview.rtf`
 - archive posters:
   `public/poster-vol1-workshop.jpeg`
+  `public/poster-vol2-post-factum.png`
   `public/poster-vol4-screening.png`
   `public/poster-vol6-workshop.jpg`
   `public/poster-vol6-screening.jpg`
