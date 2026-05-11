@@ -67,6 +67,7 @@ That command pushes the built `dist/` folder to `gh-pages`.
 - overview source copy:
   `public/media/overview.rtf`
 - archive posters:
+  `public/poster-vol1-workshop.jpeg`
   `public/poster-vol4-screening.png`
   `public/poster-vol6-workshop.jpg`
   `public/poster-vol6-screening.jpg`
@@ -95,4 +96,4 @@ The site is explicitly indexable via:
 - Do not commit credentials, auth tokens, `.env` files, or private operational notes.
 - Keep the custom domain as `gloupsoup.com` unless explicitly instructed otherwise.
 - The Google Sheet URL should not be embedded in client code; the current archive data has been copied into local source files and poster assets downloaded into `public/`.
-- Latest local state at handoff includes the archive redesign, imported volume metadata, local poster assets, director hover tuning, hero/ethos text animations, the v2 trailer swap, the refreshed overview copy from `public/media/overview.rtf`, and archive description updates copied from the sheet metadata tab.
+- Latest local state at handoff includes the archive redesign, imported volume metadata, local poster assets, director hover tuning, hero/ethos text animations, the v2 trailer swap, the refreshed overview copy from `public/media/overview.rtf`, archive description updates copied from the sheet metadata tab, and a synced archive poster/title refresh from the Google Sheet.

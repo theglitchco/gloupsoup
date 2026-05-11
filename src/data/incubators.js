@@ -22,6 +22,7 @@ export const previousIncubators = [
     participants:
       'Joe, Gareth, Szymon, Ffion, Ben, Ethan, Esther, Kubo, Marc, Isaac, Jazz, Roz, Ryan, Alex, Hunter',
     watchLink: 'https://vimeo.com/1063202698/2686ab5088',
+    posters: [{ label: 'Workshop Poster', src: '/poster-vol1-workshop.jpeg' }],
     films: [
       { title: 'Sock Puppet Interview', director: 'Roz Mather' },
       { title: 'Discordia', director: 'Kubo Adamcik' },
@@ -166,16 +167,12 @@ export const previousIncubators = [
     films: [
       { title: 'Just One More', director: 'Ella Mons & Roops Housden' },
       { title: 'Super Job Seeker', director: 'Gareth Rowntree' },
-      { title: 'Parkour', director: 'Charlie Smith', uncertain: true },
-      { title: 'Déjà Vu Matrix', director: 'Ffion Kunz', uncertain: true },
-      { title: 'Abstract Lights', director: 'Chris Dias', uncertain: true },
-      {
-        title: 'Never Eat Shredded Wheat 2: Fully Loaded',
-        director: 'Szymon Wyrzykowski',
-        uncertain: true,
-      },
-      { title: 'The Wedding Ceremony', director: 'Sonum Sumaria', uncertain: true },
-      { title: 'Bedroom Revisited', director: 'Joe Starrs', uncertain: true },
+      { title: 'Night Shift', director: 'Charlie Smith' },
+      { title: 'Deja Vu Be Kind Rewind', director: 'Ffion Kunz' },
+      { title: 'Inner Light', director: 'Chris Dias' },
+      { title: 'Never Eat Shredded Wheat 2 Fully Loaded', director: 'Szymon Wyrzykowski' },
+      { title: 'The Wedding Ceremony', director: 'Sonum Sumaria' },
+      { title: 'Architectural Disgust', director: 'Joe Starrs' },
     ],
   },
   {
