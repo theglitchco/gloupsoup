@@ -4,7 +4,7 @@ import TrailerPlayer from './components/TrailerPlayer';
 import { currentIncubator, previousIncubators } from './data/incubators';
 
 const projectParagraphs = [
-  'The Gloup Soup Incubator is a gathering of crew, filmmakers and artists. The aim is to create something based on a theme or concept within two weeks. The key is pitching something small, something you could film in half a day.',
+  'The Gloup Soup Incubator is a gathering of crew, filmmakers and artists. The aim is to create something based on a single loose theme within two weeks. The key is pitching something small, something you could film in half a day.',
   'Take on a role that you might not usually occupy. Forget about your personal brand, being audience facing, or how this might sell. This is a space to practice and mess about, without stakes, and without judgement.',
   'Remember all those ideas that grew to unmanageable proportions and ended up in the drawer? This is an excuse to play with a low resolution version.',
   'After two weeks the fruits of our labour will be screened in theglitch.co in Hackney Wick. When the credits roll, we decide on the next theme.',
