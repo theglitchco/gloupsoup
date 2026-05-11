@@ -14,7 +14,8 @@ export const previousIncubators = [
     title: '“NIGHTMARES”',
     period: '(JAN-FEB 2025)',
     accent: '#5b565d',
-    description: 'Originally without a theme, NIGHTMARES was put on to link the films after.',
+    description:
+      'Originally without a theme. After they were completed, NIGHTMARES seemed to be in the group subconsciousness.',
     workshopDate: '18.01.25',
     screeningDate: '02.03.25',
     runtime: '18:12',
@@ -35,7 +36,7 @@ export const previousIncubators = [
     title: '"LOVE"',
     period: '(MAR 2025)',
     accent: '#6a4f58',
-    description: 'Again originally without a theme, LOVE was put on to link the films after.',
+    description: 'Also initially a free for all. The theme of everlasting LOVE emerged retroactively.',
     workshopDate: '15.03.25',
     screeningDate: '06.04.25',
     runtime: '15:58',
@@ -55,8 +56,7 @@ export const previousIncubators = [
     title: '“ABSENCE”',
     period: '(APR-MAY 2025)',
     accent: '#4f5965',
-    description:
-      'ABSENCE was chosen as a theme in the workshop, with the theme coming through the suggested ideas.',
+    description: 'Organically chosen during the workshop stage. As films were pitched, a common theme of ABSENCE was agreed.',
     workshopDate: '27.04.25',
     screeningDate: '18.05.25',
     runtime: '24:38',
@@ -103,7 +103,7 @@ export const previousIncubators = [
     period: '(AUG 2025)',
     accent: '#66594e',
     description:
-      'In UNFINISHED BUSINESS we asked people to bring projects that were left unfinished in a drawer and gave people the chance to finally put them to rest.',
+      'In UNFINISHED BUSINESS we asked people to bring projects that were left unfinished in a drawer and gave people the chance to finally put it to rest.',
     workshopDate: '03.08.25',
     screeningDate: '17.08.25',
     runtime: '29:58',
@@ -127,7 +127,7 @@ export const previousIncubators = [
     period: '(SEP 2025)',
     accent: '#575a58',
     description:
-      'EXQUISITE CORPSE was designed to create a sequence of films that share starts and ends but were created independently of each other. Starting with the storyboarded image of a smashed egg, individuals or small groups would develop an idea, then present their final frame to the next person and so on.',
+      'Based on the drawing game created by early 19th century surrealists. The session was split into groups or individuals. The opening shot was chosen, an egg falling on the ground. The next group makes a film that begins with that shot, then the final shot of their film opens the next film, and so on. Part by part the EXQUISITE CORPSE was built.',
     workshopDate: '14.09.25',
     screeningDate: '12.10.25',
     runtime: '20:19',
@@ -156,7 +156,7 @@ export const previousIncubators = [
     period: '(OCT-NOV 2025)',
     accent: '#55606a',
     description:
-      'DÉJÀ VU was a given theme announced before the workshop. In the room we looked to combine and share elements across the films: props, colours, sounds, lines, and repeated fragments of image and dialogue.',
+      'DEJA VU was a given theme announced before the workshop. In the workshop we looked to combine and share elements of the films such as props, colours, sounds or lines: Cactus, Black Cat. Yellow. Spoon. Sunglasses. Old Timey music, Low angle shots, Super close mouth shots, Red light bell sound, the phrase "I feel like I\'ve been here before".',
     workshopDate: '25.10.25',
     screeningDate: '16.11.25',
     runtime: '20:24',
@@ -184,7 +184,7 @@ export const previousIncubators = [
     period: '(DEC 2025 - JAN 2026)',
     accent: '#4d5d67',
     description:
-      'A VISIT FROM FATHER TIME was chosen for the end-of-year timing of the volume, giving space for introspection and more solitary work while people were more dispersed over Christmas and New Year.',
+      'A VISIT FROM FATHER TIME was chosen given the end of year timing of this volume, feeling appropriate to give people both something that could lead to introspective reflection and allow more solitary work as people were generally more separated over the Christmas and New Year period. The theme was announced before the workshop, and the workshop gave us much discussion on timeless icons (Kilroy was ere, the school "S"), as well as interesting pasts, possible futures and the idea of Tarot, with everyone pulling a tarot card at the end.',
     workshopDate: '06.12.25',
     screeningDate: '04.01.26',
     runtime: '35:42',
@@ -213,7 +213,7 @@ export const previousIncubators = [
     period: '(JAN-FEB 2026)',
     accent: '#58624d',
     description:
-      'ONE SHOT was given ahead of time. We discussed what a one-shot truly is, when hidden cuts count, and how the form can live in both ambitious camera moves and smaller social-media or CCTV-like gestures.',
+      'The theme ONE SHOT was given ahead of time, and we discussed what a one shot truly is, deciding hidden cuts are allowed if hidden, and that it does not have to fit around grand camera movements and dramatic narrative scenes. We discussed larger ideas such as shooting across multiple cars and staging things on public transport, as well as smaller ideas like ordering a jacket potato or "shooting your shot" at asking someone out. We also discussed manifestations of the "one shot" in real life, CCTV (bus cameras, self checkouts, dash cams) and social media (get ready with me, what\'s in my bag, trick shot videos).',
     workshopDate: '17.01.26',
     screeningDate: '06.02.26',
     runtime: '51:25',

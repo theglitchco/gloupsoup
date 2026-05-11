@@ -31,6 +31,7 @@ That command pushes the built `dist/` folder to `gh-pages`.
 
 - The page background is intentionally flat black: `#050505`.
 - The hero logo is canvas-rendered and dithered from `src/assets/gloup_blank_solo.svg`.
+- The trailer now points at `public/media/incubator-trailer-v2.mp4`; `src/components/TrailerPlayer.jsx` is the swap point if a newer cut arrives.
 - `src/components/DitherLogo.jsx` now normalizes the SVG from its `viewBox` before drawing, which fixes the previous Chrome-only overscale and crop bug.
 - Desktop hero spacing is intentionally tight, while tablet and phone top padding is larger to keep the stacked layout clear of the logo.
 - There is an additional wide-desktop tuning path in `src/styles.css` for larger monitors so the logo can scale up without the hero heading colliding with the current-volume panel.
@@ -48,9 +49,9 @@ That command pushes the built `dist/` folder to `gh-pages`.
 ## Files to edit most often
 
 - `src/App.jsx`
-  Hero text, overview, ethos, section ordering, archive rendering, and page copy.
+  Hero text, overview, ethos, section ordering, archive rendering, and page copy. The live Overview copy currently mirrors `public/media/overview.rtf`.
 - `src/data/incubators.js`
-  Current incubator details, previous incubator entries, archive metadata, poster mappings, and per-volume accent colours.
+  Current incubator details, previous incubator entries, archive metadata, poster mappings, and per-volume accent colours. Archive descriptions were last refreshed from the Google Sheet metadata tab, not the film-list tab.
 - `src/components/TrailerPlayer.jsx`
   Trailer behavior and poster handling.
 - `src/components/DitherLogo.jsx`
@@ -60,7 +61,11 @@ That command pushes the built `dist/` folder to `gh-pages`.
 
 ## Public assets
 
-- trailer video: `public/media/incubator-trailer-v1.mp4`
+- trailer videos:
+  `public/media/incubator-trailer-v1.mp4`
+  `public/media/incubator-trailer-v2.mp4`
+- overview source copy:
+  `public/media/overview.rtf`
 - archive posters:
   `public/poster-vol4-screening.png`
   `public/poster-vol6-workshop.jpg`
@@ -90,4 +95,4 @@ The site is explicitly indexable via:
 - Do not commit credentials, auth tokens, `.env` files, or private operational notes.
 - Keep the custom domain as `gloupsoup.com` unless explicitly instructed otherwise.
 - The Google Sheet URL should not be embedded in client code; the current archive data has been copied into local source files and poster assets downloaded into `public/`.
-- Latest local state at handoff includes the archive redesign, imported volume metadata, local poster assets, director hover tuning, and hero/ethos text animations from this session.
+- Latest local state at handoff includes the archive redesign, imported volume metadata, local poster assets, director hover tuning, hero/ethos text animations, the v2 trailer swap, the refreshed overview copy from `public/media/overview.rtf`, and archive description updates copied from the sheet metadata tab.

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import trailerPoster from '../assets/incubator-trailer-poster.jpg';
 
-const TRAILER_SRC = '/media/incubator-trailer-v1.mp4';
+const TRAILER_SRC = '/media/incubator-trailer-v2.mp4';
 
 export default function TrailerPlayer() {
   const [status, setStatus] = useState('loading');
@@ -10,7 +10,7 @@ export default function TrailerPlayer() {
     return (
       <div className="trailer-fallback" role="status" aria-live="polite">
         <p>Trailer slot is ready.</p>
-        <p>Add the film to <code>public/media/incubator-trailer-v1.mp4</code> to enable autoplay and controls.</p>
+        <p>Add the film to <code>public/media/incubator-trailer-v2.mp4</code> to enable autoplay and controls.</p>
       </div>
     );
   }
