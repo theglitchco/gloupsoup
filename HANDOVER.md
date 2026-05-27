@@ -41,7 +41,7 @@ That command pushes the built `dist/` folder to `gh-pages`.
 - The visible logo stage is intentionally modest in size, while the hidden internal canvas is much larger to give the comet system room before it hits drawable edges.
 - The hero panel heading `VOLUME X IN PROGRESS` has a subtle pulse on the `X`; the current start date is `22.05.2026`.
 - The final `Have fun.` ethos line is intentionally animated with a toned-down fast jitter.
-- A compact unboxed animated stats strip sits after Overview/Ethos and before Previous Incubators. It displays large counting values (`9`, `78`, `4h 10min`, `41+`) with smaller captions underneath (`Volumes`, `Films`, `Runtime`, `Filmmakers`).
+- A compact unboxed animated stats strip sits after Overview/Ethos and before Previous Incubators. It displays large counting values (`9`, `78`, `41+`, `4h 10min`) with smaller captions underneath (`Volumes`, `Films`, `Filmmakers`, `Runtime`).
 - The `Previous Incubators` accordion is now a richer archive with per-volume colour accents, real volume metadata, film lists, and compact poster previews.
 - Archive film titles with `watchLink` now open in the same lightbox overlay as posters when the link is a YouTube URL, rather than sending the user off-page.
 - Film titles marked as uncertain use a small animated `?`.

@@ -50,14 +50,14 @@ const archiveStats = [
     label: 'Films',
   },
   {
-    target: 250,
-    label: 'Runtime',
-    formatValue: (value) => `${Math.floor(value / 60)}h ${value % 60}min`,
-  },
-  {
     target: 41,
     suffix: '+',
     label: 'Filmmakers',
+  },
+  {
+    target: 250,
+    label: 'Runtime',
+    formatValue: (value) => `${Math.floor(value / 60)}h ${value % 60}min`,
   },
 ];
 
