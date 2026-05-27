@@ -24,8 +24,13 @@ export default function TrailerPlayer() {
       playsInline
       controls
       preload="metadata"
+      onLoadedMetadata={() => setStatus('ready')}
       onLoadedData={() => setStatus('ready')}
-      onError={() => setStatus('missing')}
+      onError={(event) => {
+        if (event.currentTarget.readyState === 0) {
+          setStatus('missing');
+        }
+      }}
     />
   );
 }

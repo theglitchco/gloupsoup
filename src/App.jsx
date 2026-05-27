@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import DitherLogo from './components/DitherLogo';
 import TrailerPlayer from './components/TrailerPlayer';
 import { currentIncubator, previousIncubators } from './data/incubators';
@@ -39,6 +39,27 @@ const ethos = [
 ];
 
 const getDirectorNames = (director) => director.split('&').map((name) => name.trim());
+
+const archiveStats = [
+  {
+    target: 9,
+    label: 'Volumes',
+  },
+  {
+    target: 78,
+    label: 'Films',
+  },
+  {
+    target: 250,
+    label: 'Runtime',
+    formatValue: (value) => `${Math.floor(value / 60)}h ${value % 60}min`,
+  },
+  {
+    target: 41,
+    suffix: '+',
+    label: 'Filmmakers',
+  },
+];
 
 const directorCounts = previousIncubators.reduce((counts, incubator) => {
   incubator.films?.forEach((film) => {
@@ -92,6 +113,8 @@ const getYouTubeEmbedUrl = (url) => {
 export default function App() {
   const currentYear = new Date().getFullYear();
   const [activeMedia, setActiveMedia] = useState(null);
+  const [statsProgress, setStatsProgress] = useState(0);
+  const statsRef = useRef(null);
 
   useEffect(() => {
     if (!activeMedia) {
@@ -114,6 +137,60 @@ export default function App() {
     };
   }, [activeMedia]);
 
+  useEffect(() => {
+    const element = statsRef.current;
+
+    if (!element) {
+      return undefined;
+    }
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (prefersReducedMotion) {
+      setStatsProgress(1);
+      return undefined;
+    }
+
+    let animationFrame;
+    let hasAnimated = false;
+
+    const runAnimation = () => {
+      const startedAt = performance.now();
+      const duration = 1200;
+
+      const tick = (now) => {
+        const progress = Math.min(1, (now - startedAt) / duration);
+        const easedProgress = 1 - (1 - progress) ** 3;
+
+        setStatsProgress(easedProgress);
+
+        if (progress < 1) {
+          animationFrame = requestAnimationFrame(tick);
+        }
+      };
+
+      animationFrame = requestAnimationFrame(tick);
+    };
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated) {
+          hasAnimated = true;
+          runAnimation();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.35 },
+    );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(animationFrame);
+    };
+  }, []);
+
   return (
     <div className="site-shell">
       <div className="logo-background">
@@ -134,7 +211,7 @@ export default function App() {
 
           <div className="hero-panel">
             <p className="panel-heading">
-              VOLUME <span className="panel-heading-x">X</span> SOON
+              VOLUME <span className="panel-heading-x">X</span> IN PROGRESS
             </p>
             <dl className="detail-grid">
               <div>
@@ -216,6 +293,21 @@ export default function App() {
               ))}
             </ul>
           </aside>
+        </section>
+
+        <section className="stats-section" aria-label="Archive totals" ref={statsRef}>
+          <dl className="stats-grid">
+            {archiveStats.map((stat) => {
+              const value = Math.round(stat.target * statsProgress);
+
+              return (
+                <div className="stat-card" key={stat.label}>
+                  <dt>{stat.label}</dt>
+                  <dd>{stat.formatValue ? stat.formatValue(value) : `${value}${stat.suffix ?? ''}`}</dd>
+                </div>
+              );
+            })}
+          </dl>
         </section>
 
         <section className="archive-section">
