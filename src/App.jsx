@@ -95,6 +95,7 @@ const creditEntries = Array.from(
             title: film.title,
             volume: incubator.volume,
             volumeTitle: incubator.title,
+            watchLink: film.watchLink,
           });
 
           credits.set(name, credit);
@@ -224,6 +225,40 @@ export default function App() {
   const statsRef = useRef(null);
   const activeCredit = activeCreditName ? creditEntries.find((credit) => credit.name === activeCreditName) : null;
   const hoveredCredit = hoveredCreditName ? creditLayouts.find((credit) => credit.name === hoveredCreditName) : null;
+
+  const openCreditFilm = (film) => {
+    if (!film.watchLink) {
+      return;
+    }
+
+    const embedSrc = getYouTubeEmbedUrl(film.watchLink);
+    setActiveCreditName(null);
+
+    if (!embedSrc) {
+      window.open(film.watchLink, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    setActiveMedia({
+      type: 'video',
+      volume: film.volume,
+      label: film.title,
+      src: film.watchLink,
+      embedSrc,
+    });
+  };
+
+  const renderCreditFilmTitle = (film) => {
+    if (!film.watchLink) {
+      return <span>{film.title}</span>;
+    }
+
+    return (
+      <button type="button" className="credit-film-link" onClick={() => openCreditFilm(film)}>
+        {film.title}
+      </button>
+    );
+  };
 
   const getCreditFieldStyle = (credit) => {
     const { name, x, y, ...baseStyle } = credit;
@@ -692,7 +727,7 @@ export default function App() {
             <ul className="credit-film-list">
               {activeCredit.films.map((film) => (
                 <li key={`${activeCredit.name}-${film.volume}-${film.title}`}>
-                  <span>{film.title}</span>
+                  {renderCreditFilmTitle(film)}
                   <span>
                     {film.volume} {film.volumeTitle}
                   </span>
@@ -763,7 +798,7 @@ export default function App() {
             <ul className="credit-film-list">
               {activeCredit.films.map((film) => (
                 <li key={`${activeCredit.name}-${film.volume}-${film.title}`}>
-                  <span>{film.title}</span>
+                  {renderCreditFilmTitle(film)}
                   <span>
                     {film.volume} {film.volumeTitle}
                   </span>

@@ -37,6 +37,7 @@ That command pushes the built `dist/` folder to `gh-pages`.
 - There is an additional wide-desktop tuning path in `src/styles.css` for larger monitors so the logo can scale up without the hero heading colliding with the current-volume panel.
 - The footer is centered and rendered with a credits link and fixed year range: `credits / made in hackney wick, london, ooze from theglitch.co, 2025-2026`.
 - The logo has a click-triggered comet system with a maximum live pool of 10, replacement explosions, a capped click-driven logo shrink, and a calmer orbital depth model intended to feel 3D without comets rushing the camera.
+- Logo click/key activation also plays `public/media/gloupsoup.wav` as a short ident.
 - The logo layer is visually behind the content, but the page uses pointer-event passthrough in non-interactive space so the logo can still be clicked around the hero content.
 - The visible logo stage is intentionally modest in size, while the hidden internal canvas is much larger to give the comet system room before it hits drawable edges.
 - The hero panel now lists `OTHER PROJECTS`, currently `RETROWARZYWNIAK / BALL`, with Instagram and `contact@theglitch.co`.
@@ -45,7 +46,7 @@ That command pushes the built `dist/` folder to `gh-pages`.
 - The `Previous Incubators` accordion is now a richer archive with per-volume colour accents, real volume metadata, film lists, and compact poster previews.
 - Archive film titles with `watchLink` now open in the same lightbox overlay as posters when the link is a YouTube URL, rather than sending the user off-page.
 - Film titles marked as uncertain use a small animated `?`.
-- Director names in archive film lists brighten, scale, and wiggle on hover based on how many films that person directed across the archive. They are clickable and open the same film-credit modal used on the credits page.
+- Director names in archive film lists brighten, scale, and wiggle on hover based on how many films that person directed across the archive. They are clickable and open the same film-credit modal used on the credits page. Published films in that modal keep their `watchLink` and open in the existing video lightbox when embeddable.
 - The `#/credits` route shows a randomized-on-load field of participant names. Hovering a name makes it pop with the same count-driven colour logic used in the archive, while nearby names softly repel and return.
 - The main logo stage has been scaled up by roughly 10% across breakpoints, with matching mobile/tablet top-padding adjustments so the layout still clears cleanly.
 
@@ -67,6 +68,8 @@ That command pushes the built `dist/` folder to `gh-pages`.
 - trailer videos:
   `public/media/incubator-trailer-v1.mp4`
   `public/media/incubator-trailer-v2.mp4`
+- logo click ident:
+  `public/media/gloupsoup.wav`
 - overview source copy:
   `public/media/overview.rtf`
 - archive posters:

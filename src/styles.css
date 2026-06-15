@@ -565,8 +565,34 @@ dd,
   line-height: 1.8;
 }
 
-.credit-film-list li span:first-child {
+.credit-film-list li > span:first-child,
+.credit-film-link {
   color: #f2f2f2;
+}
+
+.credit-film-link {
+  appearance: none;
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  line-height: inherit;
+  text-align: left;
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    text-shadow 180ms ease;
+}
+
+.credit-film-link:hover,
+.credit-film-link:focus-visible {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.72);
+  outline: none;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.18);
 }
 
 .credit-film-list li span:last-child {

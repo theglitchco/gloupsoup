@@ -45,6 +45,7 @@ function buildLogoSource(svgMarkup) {
 
 export default function DitherLogo() {
   const canvasRef = useRef(null);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -61,6 +62,10 @@ export default function DitherLogo() {
     let explosions = [];
     let nextCometId = 0;
     let shrinkCount = 0;
+
+    audioRef.current = new Audio('/media/gloupsoup.wav');
+    audioRef.current.preload = 'auto';
+    audioRef.current.volume = 0.72;
 
     const getCometPose = (comet, time, orbitRadius) => {
       const elapsed = Math.max(0, time - comet.bornAt);
@@ -135,8 +140,20 @@ export default function DitherLogo() {
       ];
     };
 
+    const playIdent = () => {
+      const audio = audioRef.current;
+
+      if (!audio) {
+        return;
+      }
+
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    };
+
     const spawnComet = () => {
       const now = performance.now();
+      playIdent();
 
       if (1 - shrinkCount * SHRINK_STEP > MIN_SHRINK_SCALE) {
         shrinkCount += 1;
@@ -453,6 +470,8 @@ export default function DitherLogo() {
       canvas.removeEventListener('keydown', handleKeyDown);
       window.cancelAnimationFrame(frameId);
       URL.revokeObjectURL(logoSource.url);
+      audioRef.current?.pause();
+      audioRef.current = null;
     };
   }, []);
 
