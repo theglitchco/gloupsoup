@@ -604,6 +604,255 @@ dd,
   margin-top: 18px;
 }
 
+.stats-shell {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.055), transparent 24%),
+    radial-gradient(circle at 82% 32%, rgba(130, 255, 210, 0.045), transparent 28%),
+    #050505;
+}
+
+.stats-page {
+  padding-top: 54px;
+  pointer-events: auto;
+}
+
+.stats-page-hero {
+  display: grid;
+  gap: 18px;
+  max-width: 780px;
+  margin-bottom: 34px;
+}
+
+.stats-page-hero h1,
+.stats-panel-heading h2 {
+  margin: 0;
+  font-size: clamp(1rem, 1.7vw, 1.6rem);
+  line-height: 1.65;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.stats-page-hero p:not(.eyebrow) {
+  margin: 0;
+  max-width: 660px;
+  color: var(--text-soft);
+  font-size: 0.72rem;
+  line-height: 2;
+  overflow-wrap: anywhere;
+}
+
+.stats-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.stats-summary-card,
+.stats-panel,
+.stats-footnotes article {
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+    rgba(0, 0, 0, 0.52);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+}
+
+.stats-summary-card {
+  min-width: 0;
+  min-height: 112px;
+  padding: 16px 14px;
+}
+
+.stats-summary-card p {
+  margin: 0 0 18px;
+  color: var(--text-soft);
+  font-size: 0.54rem;
+  line-height: 1.8;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.stats-summary-card strong {
+  display: block;
+  color: #f2f2f2;
+  font-size: clamp(0.94rem, 1.8vw, 1.46rem);
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.stats-panel {
+  min-width: 0;
+  padding: 22px;
+}
+
+.stats-panel-heading {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.stats-panel-heading .eyebrow {
+  margin: 0;
+}
+
+.timeline-chart,
+.cumulative-chart,
+.director-stats-list {
+  display: grid;
+  gap: 12px;
+}
+
+.timeline-row {
+  display: grid;
+  gap: 12px;
+  padding: 14px 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--volume-accent, #ffffff) 28%, rgba(255, 255, 255, 0.08));
+}
+
+.timeline-row header {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: baseline;
+  color: var(--text-soft);
+  font-size: 0.56rem;
+  line-height: 1.8;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.timeline-row header span:nth-child(2) {
+  color: color-mix(in srgb, var(--volume-accent, #ffffff) 76%, #f2f2f2);
+  overflow-wrap: anywhere;
+}
+
+.timeline-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.timeline-metric,
+.cumulative-row {
+  display: grid;
+  grid-template-columns: minmax(70px, 0.52fr) minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  font-size: 0.54rem;
+  line-height: 1.8;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.timeline-metric > span:first-child,
+.cumulative-row > span:first-child {
+  color: var(--text-soft);
+}
+
+.timeline-metric strong,
+.cumulative-row strong {
+  color: #f2f2f2;
+  font-size: 0.56rem;
+  white-space: nowrap;
+}
+
+.timeline-track {
+  position: relative;
+  display: block;
+  height: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.timeline-track > span {
+  display: block;
+  width: var(--bar-width);
+  height: 100%;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--volume-accent, #ffffff) 52%, transparent), var(--volume-accent)),
+    #ffffff;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--volume-accent, #ffffff) 20%, transparent);
+}
+
+.stats-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.director-stats-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.director-stats-list li {
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.director-stats-list button {
+  appearance: none;
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 0 0;
+  border: 0;
+  background: transparent;
+  color: rgba(242, 242, 242, 0.84);
+  cursor: pointer;
+  font-size: 0.62rem;
+  line-height: 1.85;
+  text-align: left;
+  text-transform: uppercase;
+  transition:
+    color 180ms ease,
+    text-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.director-stats-list button:hover,
+.director-stats-list button:focus-visible {
+  color: var(--director-accent, #ffffff);
+  outline: none;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--director-accent, #ffffff) 22%, transparent);
+  transform: translateY(-1px);
+}
+
+.director-stats-list strong {
+  font-size: 0.7rem;
+}
+
+.stats-footnotes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.stats-footnotes article {
+  padding: 18px 20px;
+}
+
+.stats-footnotes p {
+  margin: 0;
+  color: #f2f2f2;
+  font-size: 0.68rem;
+  line-height: 2;
+}
+
+.stats-footnotes .eyebrow {
+  margin-bottom: 8px;
+  color: var(--text-soft);
+  font-size: 0.54rem;
+}
+
 .section-heading {
   display: flex;
   flex-direction: column;
@@ -1228,6 +1477,20 @@ dd,
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .stats-page {
+    padding-top: 44px;
+  }
+
+  .stats-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .timeline-metrics,
+  .stats-columns,
+  .stats-footnotes {
+    grid-template-columns: 1fr;
+  }
+
   .credits-page {
     padding-top: 220px;
   }
@@ -1268,6 +1531,10 @@ dd,
     padding-bottom: 56px;
   }
 
+  .stats-page {
+    padding-top: 42px;
+  }
+
   .logo-stage {
     top: -2px;
     width: clamp(370px, 100vw, 449px);
@@ -1296,6 +1563,30 @@ dd,
 
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .stats-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-panel {
+    padding: 18px 16px;
+  }
+
+  .timeline-row header,
+  .timeline-metric,
+  .cumulative-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .timeline-track {
+    width: 100%;
+  }
+
+  .timeline-metric strong,
+  .cumulative-row strong {
+    justify-self: start;
   }
 
   .stat-card {

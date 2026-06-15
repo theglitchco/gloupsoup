@@ -26,6 +26,7 @@ npm run deploy
 ```
 
 That command pushes the built `dist/` folder to `gh-pages`.
+Pushing `main` alone does not update the live `gloupsoup.com` site.
 
 ## Current visual state
 
@@ -43,6 +44,7 @@ That command pushes the built `dist/` folder to `gh-pages`.
 - The hero panel now lists `OTHER PROJECTS`, currently `RETROWARZYWNIAK / BALL`, with Instagram and `contact@theglitch.co`.
 - The final `Have fun.` ethos line is intentionally animated with a toned-down fast jitter.
 - A compact unboxed animated stats strip sits after Overview/Ethos and before Previous Incubators. It derives volume, film, and runtime totals from `previousIncubators`; the effect is route-aware so it animates correctly after entering from `#/credits`.
+- A hidden `#/stats` route renders derived timeline graphs, cumulative film totals, top recurring filmmakers, and summary metrics from the same archive data.
 - The `Previous Incubators` accordion is now a richer archive with per-volume colour accents, real volume metadata, film lists, and compact poster previews.
 - Archive film titles with `watchLink` now open in the same lightbox overlay as posters when the link is a YouTube URL, rather than sending the user off-page.
 - Film titles marked as uncertain use a small animated `?`.
@@ -53,7 +55,7 @@ That command pushes the built `dist/` folder to `gh-pages`.
 ## Files to edit most often
 
 - `src/App.jsx`
-  Hero text, overview, ethos, section ordering, archive rendering, credits route, shared credit modal, route-aware stats animation, and page copy.
+  Hero text, overview, ethos, section ordering, archive rendering, credits route, hidden stats route, shared credit modal, route-aware stats animation, and page copy.
 - `src/data/incubators.js`
   Contact details, ongoing project names, previous incubator entries, archive metadata, normalized poster mappings, and per-volume accent colours.
 - `src/components/TrailerPlayer.jsx`

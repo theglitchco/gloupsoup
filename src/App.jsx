@@ -47,6 +47,41 @@ const parseRuntimeSeconds = (runtime) => {
   return minutes * 60 + seconds;
 };
 
+const formatRuntime = (seconds) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.round((seconds % 3600) / 60);
+
+  if (!hours) {
+    return `${minutes}min`;
+  }
+
+  return `${hours}h ${minutes}min`;
+};
+
+const getVolumeNumber = (volume) => Number(volume.replace(/\D/g, ''));
+
+const parseArchiveDate = (date) => {
+  if (!date) {
+    return null;
+  }
+
+  const [day, month, shortYear] = date.split('.').map(Number);
+
+  if (!day || !month || Number.isNaN(shortYear)) {
+    return null;
+  }
+
+  return new Date(2000 + shortYear, month - 1, day);
+};
+
+const formatArchiveDate = (date) =>
+  date
+    ? new Intl.DateTimeFormat('en-GB', {
+        month: 'short',
+        year: 'numeric',
+      }).format(date)
+    : '';
+
 const archiveTotals = previousIncubators.reduce(
   (totals, incubator) => ({
     volumes: totals.volumes + 1,
@@ -59,6 +94,58 @@ const archiveTotals = previousIncubators.reduce(
     runtimeSeconds: 0,
   },
 );
+
+const volumeStats = previousIncubators.map((incubator) => {
+  const filmCount = incubator.films?.length ?? 0;
+  const directorNames = new Set();
+  let publishedFilms = incubator.watchLink ? 1 : 0;
+
+  incubator.films?.forEach((film) => {
+    getDirectorNames(film.director).forEach((name) => directorNames.add(name));
+
+    if (film.watchLink) {
+      publishedFilms += 1;
+    }
+  });
+
+  return {
+    volume: incubator.volume,
+    volumeNumber: getVolumeNumber(incubator.volume),
+    title: incubator.title.replace(/[“”"]/g, ''),
+    period: incubator.period.replace(/[()]/g, ''),
+    dateLabel: formatArchiveDate(parseArchiveDate(incubator.screeningDate)),
+    accent: incubator.accent,
+    films: filmCount,
+    filmmakers: directorNames.size,
+    runtimeSeconds: incubator.runtime ? parseRuntimeSeconds(incubator.runtime) : 0,
+    publishedFilms,
+  };
+});
+
+const cumulativeStats = volumeStats.reduce((stats, volume) => {
+  const previous = stats[stats.length - 1] ?? {
+    films: 0,
+    runtimeSeconds: 0,
+    publishedFilms: 0,
+  };
+
+  stats.push({
+    ...volume,
+    films: previous.films + volume.films,
+    runtimeSeconds: previous.runtimeSeconds + volume.runtimeSeconds,
+    publishedFilms: previous.publishedFilms + volume.publishedFilms,
+  });
+
+  return stats;
+}, []);
+
+const statsMaximums = {
+  films: Math.max(...volumeStats.map((volume) => volume.films), 1),
+  filmmakers: Math.max(...volumeStats.map((volume) => volume.filmmakers), 1),
+  runtimeSeconds: Math.max(...volumeStats.map((volume) => volume.runtimeSeconds), 1),
+  publishedFilms: Math.max(...volumeStats.map((volume) => volume.publishedFilms), 1),
+  cumulativeFilms: Math.max(...cumulativeStats.map((volume) => volume.films), 1),
+};
 
 const archiveStats = [
   {
@@ -117,6 +204,48 @@ const directorCounts = previousIncubators.reduce((counts, incubator) => {
   return counts;
 }, {});
 
+const topDirectorStats = Object.entries(directorCounts)
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+  .slice(0, 8);
+
+const statsPageMetrics = [
+  {
+    label: 'Volumes',
+    value: archiveTotals.volumes,
+  },
+  {
+    label: 'Films',
+    value: archiveTotals.films,
+  },
+  {
+    label: 'Filmmakers',
+    value: creditEntries.length,
+  },
+  {
+    label: 'Runtime',
+    value: formatRuntime(archiveTotals.runtimeSeconds),
+  },
+  {
+    label: 'Published Links',
+    value: volumeStats.reduce((total, volume) => total + volume.publishedFilms, 0),
+  },
+  {
+    label: 'Average Per Vol',
+    value: (archiveTotals.films / archiveTotals.volumes).toFixed(1),
+  },
+];
+
+const busiestVolume = volumeStats.reduce(
+  (busiest, volume) => (volume.films > busiest.films ? volume : busiest),
+  volumeStats[0],
+);
+
+const longestRuntimeVolume = volumeStats.reduce(
+  (longest, volume) => (volume.runtimeSeconds > longest.runtimeSeconds ? volume : longest),
+  volumeStats[0],
+);
+
 const getDirectorWeightClass = (name) => {
   const count = directorCounts[name] ?? 1;
   return `director-weight-${count === 1 ? 'single' : 'multi'}`;
@@ -163,7 +292,17 @@ const getYouTubeEmbedUrl = (url) => {
   return null;
 };
 
-const getInitialRoute = () => (window.location.hash === '#/credits' ? 'credits' : 'home');
+const getInitialRoute = () => {
+  if (window.location.hash === '#/credits') {
+    return 'credits';
+  }
+
+  if (window.location.hash === '#/stats') {
+    return 'stats';
+  }
+
+  return 'home';
+};
 
 const renderProjectParagraph = (paragraph) => {
   if (!paragraph.includes('When the credits roll')) {
@@ -375,6 +514,81 @@ export default function App() {
       clearTimeout(animationTimeout);
     };
   }, [route]);
+
+  const mediaOverlay = activeMedia ? (
+    <div
+      className="lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label={activeMedia.label ? `${activeMedia.volume} ${activeMedia.label}` : `${activeMedia.volume} media`}
+      onClick={() => setActiveMedia(null)}
+    >
+      <button
+        type="button"
+        className="lightbox-close"
+        aria-label={activeMedia.type === 'video' ? 'Close video player' : 'Close poster preview'}
+        onClick={() => setActiveMedia(null)}
+      >
+        Close
+      </button>
+      <div className="lightbox-frame" onClick={(event) => event.stopPropagation()}>
+        {activeMedia.type === 'video' && activeMedia.embedSrc ? (
+          <div className="lightbox-video-shell">
+            <iframe
+              className="lightbox-video"
+              src={activeMedia.embedSrc}
+              title={`${activeMedia.volume} ${activeMedia.label}`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        ) : (
+          <img
+            className="lightbox-image"
+            src={activeMedia.src}
+            alt={activeMedia.label ? `${activeMedia.volume} ${activeMedia.label}` : `${activeMedia.volume} poster`}
+          />
+        )}
+        <p className="lightbox-caption">
+          <span>{activeMedia.volume}</span>
+          {activeMedia.label ? <span>{activeMedia.label}</span> : null}
+        </p>
+      </div>
+    </div>
+  ) : null;
+
+  const creditOverlay = activeCredit ? (
+    <div
+      className="credit-popover"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${activeCredit.name} credits`}
+      onClick={() => setActiveCreditName(null)}
+    >
+      <div className="credit-popover-panel" onClick={(event) => event.stopPropagation()}>
+        <button
+          type="button"
+          className="lightbox-close"
+          aria-label="Close credit"
+          onClick={() => setActiveCreditName(null)}
+        >
+          Close
+        </button>
+        <p className="panel-heading">{activeCredit.name}</p>
+        <ul className="credit-film-list">
+          {activeCredit.films.map((film) => (
+            <li key={`${activeCredit.name}-${film.volume}-${film.title}`}>
+              {renderCreditFilmTitle(film)}
+              <span>
+                {film.volume} {film.volumeTitle}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  ) : null;
 
   const homePage = (
     <div className="site-shell">
@@ -664,79 +878,8 @@ export default function App() {
         </footer>
       </main>
 
-      {activeMedia ? (
-        <div
-          className="lightbox"
-          role="dialog"
-          aria-modal="true"
-          aria-label={activeMedia.label ? `${activeMedia.volume} ${activeMedia.label}` : `${activeMedia.volume} media`}
-          onClick={() => setActiveMedia(null)}
-        >
-          <button
-            type="button"
-            className="lightbox-close"
-            aria-label={activeMedia.type === 'video' ? 'Close video player' : 'Close poster preview'}
-            onClick={() => setActiveMedia(null)}
-          >
-            Close
-          </button>
-          <div className="lightbox-frame" onClick={(event) => event.stopPropagation()}>
-            {activeMedia.type === 'video' && activeMedia.embedSrc ? (
-              <div className="lightbox-video-shell">
-                <iframe
-                  className="lightbox-video"
-                  src={activeMedia.embedSrc}
-                  title={`${activeMedia.volume} ${activeMedia.label}`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                />
-              </div>
-            ) : (
-              <img
-                className="lightbox-image"
-                src={activeMedia.src}
-                alt={activeMedia.label ? `${activeMedia.volume} ${activeMedia.label}` : `${activeMedia.volume} poster`}
-              />
-            )}
-            <p className="lightbox-caption">
-              <span>{activeMedia.volume}</span>
-              {activeMedia.label ? <span>{activeMedia.label}</span> : null}
-            </p>
-          </div>
-        </div>
-      ) : null}
-      {activeCredit ? (
-        <div
-          className="credit-popover"
-          role="dialog"
-          aria-modal="true"
-          aria-label={`${activeCredit.name} credits`}
-          onClick={() => setActiveCreditName(null)}
-        >
-          <div className="credit-popover-panel" onClick={(event) => event.stopPropagation()}>
-            <button
-              type="button"
-              className="lightbox-close"
-              aria-label="Close credit"
-              onClick={() => setActiveCreditName(null)}
-            >
-              Close
-            </button>
-            <p className="panel-heading">{activeCredit.name}</p>
-            <ul className="credit-film-list">
-              {activeCredit.films.map((film) => (
-                <li key={`${activeCredit.name}-${film.volume}-${film.title}`}>
-                  {renderCreditFilmTitle(film)}
-                  <span>
-                    {film.volume} {film.volumeTitle}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      ) : null}
+      {mediaOverlay}
+      {creditOverlay}
     </div>
   );
 
@@ -777,39 +920,174 @@ export default function App() {
         </footer>
       </main>
 
-      {activeCredit ? (
-        <div
-          className="credit-popover"
-          role="dialog"
-          aria-modal="true"
-          aria-label={`${activeCredit.name} credits`}
-          onClick={() => setActiveCreditName(null)}
-        >
-          <div className="credit-popover-panel" onClick={(event) => event.stopPropagation()}>
-            <button
-              type="button"
-              className="lightbox-close"
-              aria-label="Close credit"
-              onClick={() => setActiveCreditName(null)}
-            >
-              Close
-            </button>
-            <p className="panel-heading">{activeCredit.name}</p>
-            <ul className="credit-film-list">
-              {activeCredit.films.map((film) => (
-                <li key={`${activeCredit.name}-${film.volume}-${film.title}`}>
-                  {renderCreditFilmTitle(film)}
-                  <span>
-                    {film.volume} {film.volumeTitle}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      ) : null}
+      {mediaOverlay}
+      {creditOverlay}
     </div>
   );
 
-  return route === 'credits' ? creditsPage : homePage;
+  const statsPage = (
+    <div className="site-shell stats-shell">
+      <main className="page stats-page">
+        <section className="stats-page-hero">
+          <p className="eyebrow">Hidden Stat Page</p>
+          <h1>Incubator in Numbers</h1>
+          <p>
+            Ten volumes of small films, recurring hands, short deadlines and gradually increasing soup density.
+          </p>
+        </section>
+
+        <section className="stats-summary-grid" aria-label="Incubator totals">
+          {statsPageMetrics.map((metric) => (
+            <article className="stats-summary-card" key={metric.label}>
+              <p>{metric.label}</p>
+              <strong>{metric.value}</strong>
+            </article>
+          ))}
+        </section>
+
+        <section className="stats-panel timeline-panel" aria-labelledby="timeline-heading">
+          <div className="stats-panel-heading">
+            <p className="eyebrow">Across Time</p>
+            <h2 id="timeline-heading">Volume Pulse</h2>
+          </div>
+
+          <div className="timeline-chart">
+            {volumeStats.map((volume) => (
+              <article
+                className="timeline-row"
+                key={volume.volume}
+                style={{
+                  '--volume-accent': volume.accent,
+                }}
+              >
+                <header>
+                  <span>{volume.volume}</span>
+                  <span>{volume.title}</span>
+                  <span>{volume.dateLabel || volume.period}</span>
+                </header>
+
+                <div className="timeline-metrics">
+                  <div className="timeline-metric">
+                    <span>Films</span>
+                    <span className="timeline-track">
+                      <span style={{ '--bar-width': `${(volume.films / statsMaximums.films) * 100}%` }} />
+                    </span>
+                    <strong>{volume.films}</strong>
+                  </div>
+                  <div className="timeline-metric">
+                    <span>Runtime</span>
+                    <span className="timeline-track">
+                      <span
+                        style={{
+                          '--bar-width': `${(volume.runtimeSeconds / statsMaximums.runtimeSeconds) * 100}%`,
+                        }}
+                      />
+                    </span>
+                    <strong>{formatRuntime(volume.runtimeSeconds)}</strong>
+                  </div>
+                  <div className="timeline-metric">
+                    <span>Filmmakers</span>
+                    <span className="timeline-track">
+                      <span style={{ '--bar-width': `${(volume.filmmakers / statsMaximums.filmmakers) * 100}%` }} />
+                    </span>
+                    <strong>{volume.filmmakers}</strong>
+                  </div>
+                  <div className="timeline-metric">
+                    <span>Published</span>
+                    <span className="timeline-track">
+                      <span
+                        style={{ '--bar-width': `${(volume.publishedFilms / statsMaximums.publishedFilms) * 100}%` }}
+                      />
+                    </span>
+                    <strong>{volume.publishedFilms}</strong>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="stats-columns" aria-label="Incubator derived statistics">
+          <article className="stats-panel">
+            <div className="stats-panel-heading">
+              <p className="eyebrow">Accumulation</p>
+              <h2>Films Made So Far</h2>
+            </div>
+            <div className="cumulative-chart">
+              {cumulativeStats.map((volume) => (
+                <div
+                  className="cumulative-row"
+                  key={`cumulative-${volume.volume}`}
+                  style={{
+                    '--volume-accent': volume.accent,
+                    '--bar-width': `${(volume.films / statsMaximums.cumulativeFilms) * 100}%`,
+                  }}
+                >
+                  <span>{volume.volume}</span>
+                  <span className="timeline-track">
+                    <span />
+                  </span>
+                  <strong>{volume.films}</strong>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="stats-panel">
+            <div className="stats-panel-heading">
+              <p className="eyebrow">Repeat Offenders</p>
+              <h2>Most Films Directed</h2>
+            </div>
+            <ol className="director-stats-list">
+              {topDirectorStats.map((director) => (
+                <li key={director.name} style={{ '--director-accent': getDirectorAccent(director.name) }}>
+                  <button type="button" onClick={() => setActiveCreditName(director.name)}>
+                    <span>{director.name}</span>
+                    <strong>{director.count}</strong>
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </article>
+        </section>
+
+        <section className="stats-footnotes">
+          <article>
+            <p className="eyebrow">Most Crowded Soup</p>
+            <p>
+              {busiestVolume.volume} {busiestVolume.title} with {busiestVolume.films} films.
+            </p>
+          </article>
+          <article>
+            <p className="eyebrow">Longest Screening</p>
+            <p>
+              {longestRuntimeVolume.volume} {longestRuntimeVolume.title} at{' '}
+              {formatRuntime(longestRuntimeVolume.runtimeSeconds)}.
+            </p>
+          </article>
+        </section>
+
+        <footer className="site-footer credits-footer">
+          <p>
+            <a className="inline-link" href="#top">
+              back to homepage
+            </a>
+          </p>
+        </footer>
+      </main>
+
+      {mediaOverlay}
+      {creditOverlay}
+    </div>
+  );
+
+  if (route === 'credits') {
+    return creditsPage;
+  }
+
+  if (route === 'stats') {
+    return statsPage;
+  }
+
+  return homePage;
 }
