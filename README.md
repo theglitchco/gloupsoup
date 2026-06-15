@@ -34,7 +34,7 @@
      src/styles.css............. layout + effects
      src/components/DitherLogo.jsx..... logo unit
      src/components/TrailerPlayer.jsx.. trailer unit
-     public/poster-*............ local poster files
+     public/posters/*........... local poster webp pairs
      HANDOVER.md................ notes
 
    [ contains ]

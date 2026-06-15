@@ -1,12 +1,16 @@
-export const currentIncubator = {
-  volume: 'VOL10',
-  title: 'Field Trip',
-  startDate: '22.05.2026',
-  duration: '14 days',
-  screening: '06.2026',
-  location: 'Hackney Wick',
+export const contactInfo = {
   instagram: '@gloup.soup',
+  instagramUrl: 'https://www.instagram.com/gloup.soup/',
+  email: 'contact@theglitch.co',
 };
+
+export const ongoingProjects = ['RETROWARZYWNIAK', 'BALL'];
+
+const poster = (name, label = '') => ({
+  label,
+  src: `/posters/${name}-large.webp`,
+  thumbSrc: `/posters/${name}-thumb.webp`,
+});
 
 export const previousIncubators = [
   {
@@ -22,10 +26,10 @@ export const previousIncubators = [
     participants:
       'Joe, Gareth, Szymon, Ffion, Ben, Ethan, Esther, Kubo, Marc, Isaac, Jazz, Roz, Ryan, Alex, Hunter',
     watchLink: 'https://vimeo.com/1063202698/2686ab5088',
-    posters: [{ label: '', src: '/poster-vol1-workshop.jpeg' }],
+    posters: [poster('poster-vol1-workshop')],
     films: [
       { title: 'Sock Puppet Interview', director: 'Roz Mather' },
-      { title: 'Discordia', director: 'Kubo Adamcik' },
+      { title: 'Discordia', director: 'Jakub Adamčík' },
       { title: 'The Healing Ceremony', director: 'Ben Aston & Ffion Kunz' },
       {
         title: 'Followed',
@@ -47,7 +51,7 @@ export const previousIncubators = [
     runtime: '15:58',
     participants: 'Joe, Gareth, Ffion, Fin, Jazz, Roz, Alex, Chloe, Kato, Stanley',
     watchLink: 'https://vimeo.com/1073373859/82ec95abc8',
-    posters: [{ label: '', src: '/poster-vol2-post-factum.png' }],
+    posters: [poster('poster-vol2-post-factum')],
     films: [
       {
         title: 'Tumble Teddy Playhouse',
@@ -76,11 +80,11 @@ export const previousIncubators = [
     runtime: '24:38',
     participants: 'Joe, Szymon, Fin, Roz, Mac, Kubo, Chris Dias, Jazz, Yarden',
     watchLink: 'https://vimeo.com/1087568860/5db8aee743',
-    posters: [{ label: '', src: '/poster-vol3-absence.webp' }],
+    posters: [poster('poster-vol3-absence')],
     films: [
       { title: 'Dating self-tapes', director: 'Joe Starrs' },
       { title: 'A Day In Life', director: 'Yarden Fudim' },
-      { title: 'Absence of Mel Gibson', director: 'Kubo Adamcik' },
+      { title: 'Absence of Mel Gibson', director: 'Jakub Adamčík' },
       { title: 'Green Man', director: 'Chris Dias' },
       { title: 'Voicemails', director: 'Roz Mather' },
       {
@@ -101,7 +105,7 @@ export const previousIncubators = [
     runtime: '32:59',
     participants: 'Joe, Gareth, Amber, Rhona, Kubo, Stanley, Marc, Lea, Messa, Yarden, Gabriel, Matt, Roz',
     watchLink: 'https://vimeo.com/1102284990/5ff87b8aca?ts=0&share=copy',
-    posters: [{ label: 'Screening Poster', src: '/poster-vol4-screening.png' }],
+    posters: [poster('poster-vol4-screening', 'Screening Poster')],
     films: [
       { title: 'Party Cake', director: 'Gareth Rowntree & Szymon Wyrzykowski' },
       { title: 'One More Line', director: 'Léa Brunet-Wong' },
@@ -129,7 +133,7 @@ export const previousIncubators = [
     participants:
       'Joe, Gareth, Szymon, Gabriel (online), Ryan Morris, Katya, Roz, Chloe, Alex, Marc, Ffion, Kubo, Tom, Connor',
     watchLink: 'https://vimeo.com/1111113325/4635948938?share=copy',
-    posters: [{ label: '', src: '/poster-vol5-unfinished-business.webp' }],
+    posters: [poster('poster-vol5-unfinished-business')],
     films: [
       { title: 'Bunker', director: 'Ethan Piggot' },
       { title: 'Hazardous Henry', director: 'Chloe Hancock' },
@@ -156,8 +160,8 @@ export const previousIncubators = [
     screeningDate: '12.10.25',
     runtime: '20:19',
     posters: [
-      { label: 'Workshop Poster', src: '/poster-vol6-workshop.jpg' },
-      { label: 'Screening Poster', src: '/poster-vol6-screening.jpg' },
+      poster('poster-vol6-workshop', 'Workshop Poster'),
+      poster('poster-vol6-screening', 'Screening Poster'),
     ],
     watchLink: 'https://vimeo.com/1126660021/14aa037906?share=copy',
     films: [
@@ -186,7 +190,7 @@ export const previousIncubators = [
     runtime: '20:24',
     participants: 'Joe, Szymon, Lea, Gareth, Alex, Ffion, Charlie, Sonum, Chris, Rupert, Ella, Stanley',
     watchLink: 'https://vimeo.com/1137482789/aea03a2f64?share=copy&fl=sv&fe=ci',
-    posters: [{ label: 'Screening Poster', src: '/poster-vol7-screening.jpg' }],
+    posters: [poster('poster-vol7-screening', 'Screening Poster')],
     films: [
       { title: 'Just One More', director: 'Ella Mons & Roops Housden' },
       { title: 'Super Job Seeker', director: 'Gareth Rowntree' },
@@ -210,8 +214,8 @@ export const previousIncubators = [
     runtime: '35:42',
     participants: 'Joe, Ryan M, Szymon, Ryan G, Charlie, Chris, Sonum, Roops, Ella, Gareth',
     posters: [
-      { label: 'Workshop Poster', src: '/poster-vol8-workshop.png' },
-      { label: 'Screening Poster', src: '/poster-vol8-screening.jpeg' },
+      poster('poster-vol8-workshop', 'Workshop Poster'),
+      poster('poster-vol8-screening', 'Screening Poster'),
     ],
     films: [
       { title: 'TIME INTRO', director: 'Joe Starrs' },
@@ -240,8 +244,8 @@ export const previousIncubators = [
     participants:
       'Joe, Szymon, Gareth, Finbarr, Stanley, Lea, Alex, Sonum, Maia, Marc, Roops, Ella, Kieran, T (Kato but not really)',
     posters: [
-      { label: 'Workshop Poster', src: '/poster-vol9-workshop.png' },
-      { label: 'Screening Poster', src: '/poster-vol9-screening.jpg' },
+      poster('poster-vol9-workshop', 'Workshop Poster'),
+      poster('poster-vol9-screening', 'Screening Poster'),
     ],
     films: [
       { title: "Mum's Spaghetti", director: 'Joe Starrs' },
@@ -262,6 +266,37 @@ export const previousIncubators = [
       { title: 'There Will Never Be Another You', director: 'Sonum Sumaria' },
       { title: 'I Want My Teddy', director: 'Maia Simpson-Orlebar' },
       { title: 'Get Ready With Me', director: 'Alexander Ó Broin' },
+    ],
+  },
+  {
+    volume: 'VOL10',
+    title: '“STOREHOUSE”',
+    period: '(MAY-JUN 2026)',
+    accent: '#62564d',
+    description:
+      'In STOREHOUSE we had a weekday evening field trip to the V&A East Storehouse in Here East, randomly assigning everyone a display object from the museum to go and find, and use as the starting point for the film. We followed the trip with a workshop session back at the office, where we discussed biscuit flavoured tea, Garfield phones and men with preferences for short sticks. An exercise in inspiration, it forced people to pull ideas from a place not initially fruitful. The day following the workshop a separate V&A and object pull was organised for those who could not make the previous evening.',
+    workshopDate: '22.05.26',
+    screeningDate: '14.06.26',
+    runtime: '52:09',
+    participants:
+      'Ryan G, Lea, Jo Watters, Marc, Roops, Hannah, Ella, Chris, Baran, Sonum, Kubo, Szymon, Gareth, Joe Starrs, Rob Arif, Stanley Blundell, Ti, Alex, Ava, Yarden, Ffion',
+    posters: [poster('poster-vol10-screening', 'Screening Poster')],
+    films: [
+      { title: 'V&A Intro', director: 'Joe Starrs & Szymon Wyrzykowski & Gareth Rowntree' },
+      { title: 'Woven Silk', director: 'Chris Dias' },
+      { title: 'Alien Superfans', director: 'Jo Watters' },
+      { title: 'I Am Dying', director: 'Ella Mons' },
+      { title: 'Have You Tried The Short Stick', director: 'Hannah Kline' },
+      { title: 'Oversized Cranium', director: 'Robert Arif' },
+      { title: 'Date Show', director: 'Sonum Sumaria' },
+      { title: 'My Trusty Noose', director: 'Stanley Blundell' },
+      { title: 'What Do I Talk About When I Talk About Sneakers', director: 'Jakub Adamčík' },
+      { title: 'How To Watch A Film', director: 'Gareth Rowntree' },
+      { title: 'Gone For A Walk', director: 'Léa Brunet-Wong' },
+      { title: 'The Vessel', director: 'Roops Housden' },
+      { title: 'Minute History: Episode 47', director: 'Szymon Wyrzykowski' },
+      { title: 'Rickety Framing', director: 'Alexander Ó Broin' },
+      { title: 'Fishy Fish', director: 'Joe Starrs' },
     ],
   },
 ];

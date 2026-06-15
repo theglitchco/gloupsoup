@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import DitherLogo from './components/DitherLogo';
 import TrailerPlayer from './components/TrailerPlayer';
-import { currentIncubator, previousIncubators } from './data/incubators';
+import { contactInfo, ongoingProjects, previousIncubators } from './data/incubators';
 
 const projectParagraphs = [
   'The Gloup Soup Incubator is a gathering of crew, filmmakers and artists. The aim is to create something based on a single loose theme within two weeks. The key is pitching something small, something you could film in half a day.',
   'Take on a role that you might not usually occupy. Forget about your personal brand, being audience facing, or how this might sell. This is a space to practice and mess about, without stakes, and without judgement.',
   'Remember all those ideas that grew to unmanageable proportions and ended up in the drawer? This is an excuse to play with a low resolution version.',
   'After two weeks the fruits of our labour will be screened in theglitch.co in Hackney Wick. When the credits roll, we decide on the next theme.',
+  'The incubator series has concluded (for now). It led to the birth of many projects that now require a little parenting before laying more eggs.',
 ];
 
 const ethos = [
@@ -38,28 +39,72 @@ const ethos = [
   },
 ];
 
-const getDirectorNames = (director) => director.split('&').map((name) => name.trim());
+const getDirectorNames = (director) => director.split(/\s*(?:&|,)\s*/).map((name) => name.trim()).filter(Boolean);
+
+const parseRuntimeSeconds = (runtime) => {
+  const [minutes, seconds] = runtime.split(':').map(Number);
+
+  return minutes * 60 + seconds;
+};
+
+const archiveTotals = previousIncubators.reduce(
+  (totals, incubator) => ({
+    volumes: totals.volumes + 1,
+    films: totals.films + (incubator.films?.length ?? 0),
+    runtimeSeconds: totals.runtimeSeconds + (incubator.runtime ? parseRuntimeSeconds(incubator.runtime) : 0),
+  }),
+  {
+    volumes: 0,
+    films: 0,
+    runtimeSeconds: 0,
+  },
+);
 
 const archiveStats = [
   {
-    target: 9,
+    target: archiveTotals.volumes,
     label: 'Volumes',
   },
   {
-    target: 78,
+    target: archiveTotals.films,
     label: 'Films',
   },
   {
-    target: 41,
+    target: 50,
     suffix: '+',
     label: 'Filmmakers',
   },
   {
-    target: 250,
+    target: Math.round(archiveTotals.runtimeSeconds / 60),
     label: 'Runtime',
     formatValue: (value) => `${Math.floor(value / 60)}h ${value % 60}min`,
   },
 ];
+
+const creditEntries = Array.from(
+  previousIncubators
+    .reduce((credits, incubator) => {
+      incubator.films?.forEach((film) => {
+        getDirectorNames(film.director).forEach((name) => {
+          const credit = credits.get(name) ?? {
+            name,
+            films: [],
+          };
+
+          credit.films.push({
+            title: film.title,
+            volume: incubator.volume,
+            volumeTitle: incubator.title,
+          });
+
+          credits.set(name, credit);
+        });
+      });
+
+      return credits;
+    }, new Map())
+    .values(),
+).sort((a, b) => a.name.localeCompare(b.name));
 
 const directorCounts = previousIncubators.reduce((counts, incubator) => {
   incubator.films?.forEach((film) => {
@@ -76,12 +121,19 @@ const getDirectorWeightClass = (name) => {
   return `director-weight-${count === 1 ? 'single' : 'multi'}`;
 };
 
+const getDirectorAccent = (name) => {
+  const count = directorCounts[name] ?? 1;
+  const intensity = Math.max(0, count - 1);
+
+  return `hsl(${Math.max(0, 190 - intensity * 22)} 92% ${Math.max(68, 84 - intensity * 2)}%)`;
+};
+
 const getDirectorStyle = (name) => {
   const count = directorCounts[name] ?? 1;
   const intensity = Math.max(0, count - 1);
 
   return {
-    '--director-accent': `hsl(${Math.max(0, 190 - intensity * 22)} 92% ${Math.max(68, 84 - intensity * 2)}%)`,
+    '--director-accent': getDirectorAccent(name),
     '--director-scale': `${(1.04 + intensity * 0.028).toFixed(3)}`,
     '--director-tilt': `${(1.1 + intensity * 0.42).toFixed(2)}deg`,
     '--director-wiggle-speed': `${Math.max(0.58, 1.9 - intensity * 0.18).toFixed(2)}s`,
@@ -110,20 +162,124 @@ const getYouTubeEmbedUrl = (url) => {
   return null;
 };
 
+const getInitialRoute = () => (window.location.hash === '#/credits' ? 'credits' : 'home');
+
+const renderProjectParagraph = (paragraph) => {
+  if (!paragraph.includes('When the credits roll')) {
+    return paragraph;
+  }
+
+  return (
+    <>
+      After two weeks the fruits of our labour will be screened in theglitch.co in Hackney Wick. When the{' '}
+      <a className="inline-link" href="#/credits">
+        credits
+      </a>{' '}
+      roll, we decide on the next theme.
+    </>
+  );
+};
+
+const createCreditLayouts = (entries) => {
+  const columns = 5;
+  const rows = Math.ceil(entries.length / columns) || 1;
+  const slots = Array.from({ length: columns * rows }, (_, index) => index);
+
+  for (let index = slots.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [slots[index], slots[swapIndex]] = [slots[swapIndex], slots[index]];
+  }
+
+  const xStep = columns > 1 ? 80 / (columns - 1) : 0;
+  const yStep = rows > 1 ? 64 / (rows - 1) : 0;
+
+  return entries.map((credit, index) => {
+    const slot = slots[index];
+    const column = slot % columns;
+    const row = Math.floor(slot / columns);
+    const x = 10 + column * xStep + (Math.random() - 0.5) * 4.2;
+    const y = 23 + row * yStep + (Math.random() - 0.5) * 3.6;
+
+    return {
+      name: credit.name,
+      x,
+      y,
+      '--credit-x': `${x}%`,
+      '--credit-y': `${y}%`,
+      '--credit-delay': `${(index % 12) * -0.31}s`,
+      '--credit-drift': `${10 + (index % 7)}px`,
+      '--credit-size': `${0.76 + (index % 4) * 0.04}rem`,
+      '--credit-accent': getDirectorAccent(credit.name),
+    };
+  });
+};
+
 export default function App() {
-  const currentYear = new Date().getFullYear();
   const [activeMedia, setActiveMedia] = useState(null);
+  const [activeCreditName, setActiveCreditName] = useState(null);
+  const [hoveredCreditName, setHoveredCreditName] = useState(null);
+  const [route, setRoute] = useState(getInitialRoute);
   const [statsProgress, setStatsProgress] = useState(0);
+  const [creditLayouts] = useState(() => createCreditLayouts(creditEntries));
   const statsRef = useRef(null);
+  const activeCredit = activeCreditName ? creditEntries.find((credit) => credit.name === activeCreditName) : null;
+  const hoveredCredit = hoveredCreditName ? creditLayouts.find((credit) => credit.name === hoveredCreditName) : null;
+
+  const getCreditFieldStyle = (credit) => {
+    const { name, x, y, ...baseStyle } = credit;
+
+    if (!hoveredCredit) {
+      return baseStyle;
+    }
+
+    if (name === hoveredCredit.name) {
+      return {
+        ...baseStyle,
+        '--credit-scale': '1.24',
+        '--credit-opacity': '1',
+        '--credit-repel-x': '0px',
+        '--credit-repel-y': '0px',
+      };
+    }
+
+    const dx = x - hoveredCredit.x;
+    const dy = y - hoveredCredit.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const force = Math.max(0, 1 - distance / 36);
+    const length = distance || 1;
+    const repel = force * 96;
+
+    return {
+      ...baseStyle,
+      '--credit-scale': `${1 - force * 0.08}`,
+      '--credit-opacity': `${Math.max(0.28, 0.92 - force * 0.58)}`,
+      '--credit-repel-x': `${(dx / length) * repel}px`,
+      '--credit-repel-y': `${(dy / length) * repel}px`,
+    };
+  };
 
   useEffect(() => {
-    if (!activeMedia) {
+    const handleHashChange = () => {
+      setRoute(getInitialRoute());
+      setActiveCreditName(null);
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!activeMedia && !activeCreditName) {
       return undefined;
     }
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setActiveMedia(null);
+        setActiveCreditName(null);
       }
     };
 
@@ -135,14 +291,14 @@ export default function App() {
       document.body.style.overflow = overflow;
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [activeMedia]);
+  }, [activeMedia, activeCreditName]);
 
   useEffect(() => {
-    const element = statsRef.current;
-
-    if (!element) {
+    if (route !== 'home') {
       return undefined;
     }
+
+    setStatsProgress(0);
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -152,46 +308,40 @@ export default function App() {
     }
 
     let animationFrame;
-    let hasAnimated = false;
+    let animationTimeout;
 
     const runAnimation = () => {
       const startedAt = performance.now();
       const duration = 1200;
 
       const tick = (now) => {
-        const progress = Math.min(1, (now - startedAt) / duration);
+        const progress = Math.min(1, Math.max(0, (now - startedAt) / duration));
         const easedProgress = 1 - (1 - progress) ** 3;
 
         setStatsProgress(easedProgress);
 
         if (progress < 1) {
           animationFrame = requestAnimationFrame(tick);
+        } else {
+          clearTimeout(animationTimeout);
         }
       };
 
+      animationTimeout = window.setTimeout(() => {
+        setStatsProgress(1);
+      }, duration + 160);
       animationFrame = requestAnimationFrame(tick);
     };
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated) {
-          hasAnimated = true;
-          runAnimation();
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.35 },
-    );
-
-    observer.observe(element);
+    runAnimation();
 
     return () => {
-      observer.disconnect();
       cancelAnimationFrame(animationFrame);
+      clearTimeout(animationTimeout);
     };
-  }, []);
+  }, [route]);
 
-  return (
+  const homePage = (
     <div className="site-shell">
       <div className="logo-background">
         <div className="logo-anchor">
@@ -210,36 +360,36 @@ export default function App() {
           </div>
 
           <div className="hero-panel">
-            <p className="panel-heading">
-              VOLUME <span className="panel-heading-x">X</span> IN PROGRESS
-            </p>
+            <p className="panel-heading">Other Projects</p>
             <dl className="detail-grid">
               <div>
-                <dt>Title</dt>
-                <dd>{currentIncubator.title}</dd>
+                <dt>Now Cooking</dt>
+                <dd>
+                  <span className="project-list">{ongoingProjects.join(' / ')}</span>
+                </dd>
               </div>
               <div>
-                <dt>Start Date</dt>
-                <dd>{currentIncubator.startDate}</dd>
+                <dt>DM, Call, Help!</dt>
+                <dd>Producers, art dpt, runners, writers, sfx, h&m</dd>
               </div>
               <div>
-                <dt>Duration</dt>
-                <dd>{currentIncubator.duration}</dd>
-              </div>
-              <div>
-                <dt>Location</dt>
-                <dd>{currentIncubator.location}</dd>
+                <dt>Email</dt>
+                <dd>
+                  <a className="inline-link" href={`mailto:${contactInfo.email}`}>
+                    {contactInfo.email}
+                  </a>
+                </dd>
               </div>
               <div>
                 <dt>Instagram</dt>
                 <dd>
                   <a
                     className="inline-link"
-                    href="https://www.instagram.com/gloup.soup/"
+                    href={contactInfo.instagramUrl}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {currentIncubator.instagram}
+                    {contactInfo.instagram}
                   </a>
                 </dd>
               </div>
@@ -255,7 +405,7 @@ export default function App() {
           <article className="copy-panel">
             <p className="panel-heading">Overview</p>
             {projectParagraphs.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
+              <p key={paragraph}>{renderProjectParagraph(paragraph)}</p>
             ))}
           </article>
 
@@ -386,14 +536,14 @@ export default function App() {
                             <span className="poster-thumb-frame">
                               <img
                                 className="poster-thumb"
-                                src={poster.src}
+                                src={poster.thumbSrc ?? poster.src}
                                 alt={poster.label ? `${incubator.volume} ${poster.label}` : `${incubator.volume} poster`}
                                 loading="lazy"
                               />
                             </span>
                             {poster.label ? <span className="poster-card-label">{poster.label}</span> : null}
                             <span className="poster-preview" aria-hidden="true">
-                              <img src={poster.src} alt="" loading="lazy" />
+                              <img src={poster.thumbSrc ?? poster.src} alt="" loading="lazy" />
                             </span>
                           </button>
                         ))}
@@ -436,12 +586,14 @@ export default function App() {
                               Directed by{' '}
                               {getDirectorNames(film.director).map((name, index, names) => (
                                 <span key={`${film.title}-${name}`}>
-                                  <span
+                                  <button
+                                    type="button"
                                     className={`director-name ${getDirectorWeightClass(name)}`}
                                     style={getDirectorStyle(name)}
+                                    onClick={() => setActiveCreditName(name)}
                                   >
                                     {name}
-                                  </span>
+                                  </button>
                                   {index < names.length - 1 ? ' & ' : ''}
                                 </span>
                               ))}
@@ -459,6 +611,10 @@ export default function App() {
 
         <footer className="site-footer">
           <p>
+            <a className="inline-link" href="#/credits">
+              credits
+            </a>
+            {' / '}
             made in hackney wick, london, ooze from{' '}
             <a
               className="inline-link"
@@ -468,7 +624,7 @@ export default function App() {
             >
               theglitch.co
             </a>
-            , {currentYear}
+            , 2025-2026
           </p>
         </footer>
       </main>
@@ -515,6 +671,110 @@ export default function App() {
           </div>
         </div>
       ) : null}
+      {activeCredit ? (
+        <div
+          className="credit-popover"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${activeCredit.name} credits`}
+          onClick={() => setActiveCreditName(null)}
+        >
+          <div className="credit-popover-panel" onClick={(event) => event.stopPropagation()}>
+            <button
+              type="button"
+              className="lightbox-close"
+              aria-label="Close credit"
+              onClick={() => setActiveCreditName(null)}
+            >
+              Close
+            </button>
+            <p className="panel-heading">{activeCredit.name}</p>
+            <ul className="credit-film-list">
+              {activeCredit.films.map((film) => (
+                <li key={`${activeCredit.name}-${film.volume}-${film.title}`}>
+                  <span>{film.title}</span>
+                  <span>
+                    {film.volume} {film.volumeTitle}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
+
+  const creditsPage = (
+    <div className="site-shell">
+      <main className="page credits-page">
+        <section className="credits-section" aria-labelledby="credits-heading">
+          <div className="credits-heading">
+            <p className="eyebrow">People Who Made It Possible</p>
+            <h1 id="credits-heading">Credits</h1>
+          </div>
+
+          <div className="credits-orbit" aria-label="Gloup Soup filmmaker credits">
+            {creditEntries.map((credit, index) => (
+              <button
+                type="button"
+                className="credit-name"
+                key={credit.name}
+                style={getCreditFieldStyle(creditLayouts[index])}
+                onPointerEnter={() => setHoveredCreditName(credit.name)}
+                onPointerLeave={() => setHoveredCreditName(null)}
+                onFocus={() => setHoveredCreditName(credit.name)}
+                onBlur={() => setHoveredCreditName(null)}
+                onClick={() => setActiveCreditName(credit.name)}
+              >
+                {credit.name}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <footer className="site-footer credits-footer">
+          <p>
+            <a className="inline-link" href="#top">
+              back to homepage
+            </a>
+          </p>
+        </footer>
+      </main>
+
+      {activeCredit ? (
+        <div
+          className="credit-popover"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${activeCredit.name} credits`}
+          onClick={() => setActiveCreditName(null)}
+        >
+          <div className="credit-popover-panel" onClick={(event) => event.stopPropagation()}>
+            <button
+              type="button"
+              className="lightbox-close"
+              aria-label="Close credit"
+              onClick={() => setActiveCreditName(null)}
+            >
+              Close
+            </button>
+            <p className="panel-heading">{activeCredit.name}</p>
+            <ul className="credit-film-list">
+              {activeCredit.films.map((film) => (
+                <li key={`${activeCredit.name}-${film.volume}-${film.title}`}>
+                  <span>{film.title}</span>
+                  <span>
+                    {film.volume} {film.volumeTitle}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+
+  return route === 'credits' ? creditsPage : homePage;
 }
