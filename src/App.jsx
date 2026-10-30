@@ -806,7 +806,17 @@ export default function App() {
                         {incubator.films.map((film) => (
                           <li key={`${incubator.volume}-${film.title}`}>
                             <span className={film.uncertain ? 'film-title film-title-uncertain' : 'film-title'}>
-                              {film.watchLink ? (
+                              {film.watchLink && !getYouTubeEmbedUrl(film.watchLink) ? (
+                                // Instagram and the like: no player here, so it opens there
+                                <a
+                                  className="film-title-link"
+                                  href={film.watchLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {film.title}
+                                </a>
+                              ) : film.watchLink ? (
                                 <button
                                   type="button"
                                   className="film-title-link"
